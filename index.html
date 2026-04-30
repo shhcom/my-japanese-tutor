@@ -396,12 +396,12 @@
             loadQuiz();
         }
 
-        // 📌 [소제목 8] 화면에 문제 세팅하기 (단어 모드 시 힌트 표시)
+        // 📌 [소제목 8] 화면에 문제 세팅하기 (💡 글자 길이에 따른 폰트 자동 조절 추가!)
         function loadQuiz() {
             const currentQuiz = quizData[currentQuizIndex];
             isFirstTry = true; 
             
-            // 💡 단어 모드일 때는 '이 단어의 뜻은?' 문구를 표시하고 획순 보기를 숨김
+            // 힌트 표시 및 획순 버튼 숨김 제어
             if (currentMode === 'word') {
                 document.getElementById('meaningHint').innerText = "이 단어의 뜻은?";
                 document.getElementById('hintBtn').style.display = 'none';
@@ -410,8 +410,24 @@
                 document.getElementById('hintBtn').style.display = 'inline-block';
             }
 
-            document.getElementById('questionText').innerText = currentQuiz.question;
+            // 문제 글자 띄우기
+            const questionEl = document.getElementById('questionText');
+            questionEl.innerText = currentQuiz.question;
             
+            // 💡 여기가 문제를 해결해 줄 핵심 마법의 코드!
+            // 문제의 글자 수(length)를 세어서 폰트 크기를 유동적으로 바꿔줘!
+            const textLen = currentQuiz.question.length;
+            if (textLen === 1) {
+                questionEl.style.fontSize = '6rem';       // 낱글자는 아주 큼직하게!
+            } else if (textLen <= 3) {
+                questionEl.style.fontSize = '4.5rem';     // 2~3글자 단어 (예: りんご)
+            } else if (textLen <= 5) {
+                questionEl.style.fontSize = '3rem';       // 4~5글자 단어 (예: ソーセージ)
+            } else {
+                questionEl.style.fontSize = '2.2rem';     // 6글자 이상 긴 단어 (예: オランウータン)
+            }
+            
+            // 보기 4개 섞어서 버튼에 넣기
             let shuffledOptions = [...currentQuiz.options];
             shuffleArray(shuffledOptions);
 

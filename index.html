@@ -1,5 +1,5 @@
 <!-- ================================================== -->
-<!-- 🏆 [1단원] 발음 듣기 & 반대 퀴즈 UI 추가 (HTML & CSS) 🏆 -->
+<!-- 🏆 [1단원] 화면 구성 및 디자인 (HTML & CSS) 🏆 -->
 <!-- ================================================== -->
 <!DOCTYPE html>
 <html lang="ko">
@@ -7,34 +7,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>이즈의 일본어 튜터</title>
-    
     <style>
-        /* 기본 스타일 */
+        /* 🎨 1. 기본 배경 및 폰트 */
         body { margin: 0; padding: 0; background-color: #121212; color: #e0e0e0; font-family: 'Apple SD Gothic Neo', sans-serif; height: 100vh; overflow: hidden; }
         .screen { display: none; flex-direction: column; height: 100vh; }
         .active-screen { display: flex; } 
+        
+        /* 🎨 2. 상단 헤더 */
         header { text-align: center; padding: 20px; font-size: 1.2rem; font-weight: bold; background-color: #1e1e1e; display: flex; justify-content: space-between; align-items: center; }
         .back-btn { background: none; border: none; color: #aaa; font-size: 1rem; font-weight: bold; cursor: pointer; padding: 0; }
         .back-btn:hover { color: #fff; }
         
+        /* 🎨 3. 중앙 컨테이너 (문제 나오는 곳) */
         .center-container { flex: 1; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; width: 100%; box-sizing: border-box; }
         
-        /* 💡 퀴즈 방향 선택 스위치 스타일 */
+        /* 💡 4. 퀴즈 방향 선택 스위치 (일->한 / 한->일) */
         .direction-toggle-container { display: flex; background-color: #1e1e1e; border-radius: 10px; margin-bottom: 25px; border: 1px solid #333; overflow: hidden; }
         .direction-btn { padding: 10px 15px; font-size: 0.95rem; font-weight: bold; border: none; background: none; color: #aaa; cursor: pointer; transition: 0.3s; }
         .direction-btn.active { background-color: #bb86fc; color: #121212; }
 
+        /* 🎨 5. 문제 텍스트 스타일 */
         .meaning-hint { font-size: 1.2rem; color: #bb86fc; margin-bottom: 10px; font-weight: bold; text-align: center; }
         .japanese-char { font-weight: bold; color: #ffffff; text-shadow: 0 4px 15px rgba(255, 255, 255, 0.15); margin-bottom: 15px; text-align: center; word-break: keep-all; line-height: 1.2; width: 100%; }
 
-        /* 💡 발음 듣기(TTS) 버튼 스타일 */
-        .tts-btn { padding: 10px 20px; font-size: 1.2rem; background-color: #333; color: #03dac6; border: 1px solid #03dac6; border-radius: 20px; cursor: pointer; transition: 0.2s; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; font-weight: bold; }
-        .tts-btn:hover { background-color: #03dac6; color: #121212; }
+        /* 💡 6. 발음 듣기(TTS) 버튼 (여/남 디자인 분리) */
+        .tts-container { display: flex; gap: 15px; margin-bottom: 15px; }
+        .tts-btn { padding: 10px 20px; font-size: 1.1rem; background-color: #333; border-radius: 20px; cursor: pointer; transition: 0.2s; font-weight: bold; }
+        .tts-btn.female { color: #03dac6; border: 1px solid #03dac6; }
+        .tts-btn.female:hover { background-color: #03dac6; color: #121212; }
+        .tts-btn.male { color: #bb86fc; border: 1px solid #bb86fc; }
+        .tts-btn.male:hover { background-color: #bb86fc; color: #121212; }
 
+        /* 🎨 7. 학습 범위 태그 */
         .range-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 25px; max-width: 350px; }
         .range-tag { padding: 8px 12px; border-radius: 20px; border: 1px solid #bb86fc; color: #bb86fc; cursor: pointer; transition: 0.2s; font-size: 0.9rem; font-weight: bold; }
         .range-tag.active { background-color: #bb86fc; color: #121212; }
 
+        /* 🎨 8. 메인 메뉴 버튼 */
         .menu-btn { padding: 15px 30px; font-size: 1.2rem; font-weight: bold; margin: 8px; background-color: #1e1e1e; color: #e0e0e0; border: 2px solid #bb86fc; border-radius: 15px; cursor: pointer; width: 260px; transition: 0.2s; }
         .menu-btn:hover { background-color: #bb86fc; color: #121212; }
         .menu-btn.word-mode { border-color: #03dac6; color: #03dac6; }
@@ -42,6 +51,7 @@
         .menu-btn.sentence-mode { border-color: #ff9800; color: #ff9800; }
         .menu-btn.sentence-mode:hover { background-color: #ff9800; color: #121212; }
 
+        /* 🎨 9. 정답 선택 버튼 (4지선다) */
         .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
         .option-btn { padding: 15px 10px; font-size: 1.1rem; font-weight: bold; border: 1px solid #333; border-radius: 15px; background-color: #2c2c2c; color: #ffffff; cursor: pointer; transition: all 0.2s ease; word-break: keep-all; line-height: 1.3; }
         .option-btn:active { transform: scale(0.95); }
@@ -49,26 +59,29 @@
         .correct { background-color: #4CAF50 !important; color: white !important; border-color: #4CAF50 !important; }
         .wrong { background-color: #F44336 !important; color: white !important; border-color: #F44336 !important; }
         
+        /* 🎨 10. 팝업 모달 (획순 보기) */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background-color: #1e1e1e; padding: 30px; border-radius: 15px; text-align: center; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.5); border: 1px solid #333; }
         .modal-title { font-size: 1.2rem; margin-bottom: 15px; font-weight: bold; color: #fff; }
         .close-btn { position: absolute; top: 10px; right: 15px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .close-btn:hover { color: #fff; }
     </style>
 </head>
 <body>
 
-    <!-- 🏠 메인 화면 -->
+    <!-- 🏠 1. 메인 화면 시작 -->
     <div id="mainScreen" class="screen active-screen">
         <header style="justify-content: center;">이즈의 일본어 튜터</header>
         <div class="center-container">
             
-            <!-- 💡 방향 설정 버튼 추가 -->
+            <!-- 💡 퀴즈 출제 방향 설정 -->
             <div style="margin-bottom: 8px; color: #aaa; font-size: 0.9rem;">퀴즈 출제 방식</div>
             <div class="direction-toggle-container">
                 <button id="dirJpToKr" class="direction-btn active" onclick="setDirection('jp_to_kr')">🇯🇵 일 ➔ 🇰🇷 한</button>
                 <button id="dirKrToJp" class="direction-btn" onclick="setDirection('kr_to_jp')">🇰🇷 한 ➔ 🇯🇵 일</button>
             </div>
 
+            <!-- 💡 학습 범위 설정 -->
             <div style="margin-bottom: 10px; color: #aaa; font-size: 0.9rem;">학습할 범위를 껐다 켤 수 있어!</div>
             <div class="range-grid">
                 <div class="range-tag active" onclick="toggleRange('아행', this)">아행</div>
@@ -84,14 +97,16 @@
                 <div class="range-tag active" onclick="toggleRange('회화', this)">기초 인사</div>
             </div>
 
+            <!-- 💡 학습 모드 선택 버튼 -->
             <button class="menu-btn" onclick="startGame('hiragana')">あ 히라가나 낱글자</button>
             <button class="menu-btn" onclick="startGame('katakana')">ア 가타카나 낱글자</button>
             <button class="menu-btn word-mode" onclick="startGame('word')">🍎 교재 속 단어 퀴즈</button>
             <button class="menu-btn sentence-mode" onclick="startGame('sentence')">💬 생활 회화 퀴즈</button>
         </div>
     </div>
+    <!-- 메인 화면 끝 -->
 
-    <!-- 📝 퀴즈 화면 -->
+    <!-- 📝 2. 퀴즈 화면 시작 -->
     <div id="quizScreen" class="screen">
         <header>
             <button class="back-btn" onclick="goHome()">◀ 홈으로</button>
@@ -103,12 +118,17 @@
             <div id="meaningHint" class="meaning-hint"></div>
             <div class="japanese-char" id="questionText">あ</div>
             
-            <!-- 💡 발음 듣기 버튼 추가 (클릭 시 playTTS 함수 실행) -->
-            <button id="ttsBtn" class="tts-btn" onclick="playTTS()">🔊 발음 듣기</button>
+            <!-- 💡 발음 듣기 남/여 분리 버튼 -->
+            <div class="tts-container">
+                <button class="tts-btn female" onclick="playTTS('female')">👩🏻 여자 발음</button>
+                <button class="tts-btn male" onclick="playTTS('male')">👦🏻 남자 발음</button>
+            </div>
             
-            <button id="hintBtn" onclick="showStrokeOrder()" style="padding: 10px 20px; background-color: #333; color: #bb86fc; border: 1px solid #bb86fc; border-radius: 20px; cursor: pointer;">획순 보기 ✍️</button>
+            <!-- 획순 보기 버튼 -->
+            <button id="hintBtn" onclick="showStrokeOrder()" style="padding: 10px 20px; background-color: #333; color: #bb86fc; border: 1px solid #bb86fc; border-radius: 20px; cursor: pointer; font-weight: bold;">획순 보기 ✍️</button>
         </div>
 
+        <!-- 💡 4지선다 보기 버튼 -->
         <div class="button-grid">
             <button class="option-btn" onclick="checkAnswer(0)" id="btn0"></button>
             <button class="option-btn" onclick="checkAnswer(1)" id="btn1"></button>
@@ -116,8 +136,9 @@
             <button class="option-btn" onclick="checkAnswer(3)" id="btn3"></button>
         </div>
     </div>
+    <!-- 퀴즈 화면 끝 -->
 
-    <!-- 획순 보기 팝업창 -->
+    <!-- 🖼️ 3. 획순 보기 팝업창 -->
     <div id="strokeModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeStrokeOrder()">&times;</span>
@@ -127,10 +148,10 @@
     </div>
 
 <!-- ================================================== -->
-<!-- 🧠 [2단원] 방대한 데이터 창고 (글자 + 단어 + 회화 문장) 🧠 -->
+<!-- 🧠 [2단원] 방대한 데이터 창고 (자바스크립트 시작) 🧠 -->
 <!-- ================================================== -->
     <script>
-        // 📌 [소제목 1] 히라가나 낱글자 데이터
+        // 📚 1. 히라가나 낱글자 데이터 (총 46개)
         const hiraganaData = [
             { question: 'あ', answer: '아', path: '히라가나/아행', options: ['아', '이', '우', '에'] },
             { question: 'い', answer: '이', path: '히라가나/아행', options: ['이', '카', '키', '사'] },
@@ -180,7 +201,7 @@
             { question: 'ん', answer: '응', path: '히라가나', options: ['응', '와', '음', '은'] }
         ];
 
-        // 📌 [소제목 2] 가타카나 낱글자 데이터
+        // 📚 2. 가타카나 낱글자 데이터 (총 46개)
         const katakanaData = [
             { question: 'ア', answer: '아', path: '가타카나/아행', options: ['아', '이', '우', '에'] },
             { question: 'イ', answer: '이', path: '가타카나/아행', options: ['이', '카', '키', '사'] },
@@ -230,8 +251,9 @@
             { question: 'ン', answer: '응', path: '가타카나', options: ['ン', '와', '음', '은'] }
         ];
 
-        // 📌 [소제목 3] 교재 사진 통합 단어 데이터
+        // 📚 3. 교재 사진 기반 단어 데이터 (히라가나 + 가타카나)
         const wordData = [
+            // 히라가나 교재 단어
             { question: 'あかちゃん', answer: '아기', row: '아행', options: ['아기', '사과', '연필', '왕'] },
             { question: 'いちご', answer: '딸기', row: '아행', options: ['딸기', '의자', '거북이', '다리미'] },
             { question: 'うさぎ', answer: '토끼', row: '아행', options: ['토끼', '바다', '고양이', '고기'] },
@@ -278,6 +300,8 @@
             { question: 'わし', answer: '독수리', row: '와행', options: ['독수리', '참새', '제비', '까마귀'] },
             { question: 'てをあらう', answer: '손을씻다', row: '와행', options: ['손을씻다', '세수하다', '목욕하다', '청소하다'] },
             { question: 'にんじん', answer: '당근', row: '와행', options: ['당근', '오이', '가지', '무'] },
+            
+            // 가타카나 교재 단어
             { question: 'アイロン', answer: '다리미', row: '아행', options: ['다리미', '세탁기', '청소기', '선풍기'] },
             { question: 'イルカ', answer: '돌고래', row: '아행', options: ['돌고래', '상어', '고래', '물고기'] },
             { question: 'オランウータン', answer: '오랑우탄', row: '아행', options: ['오랑우탄', '원숭이', '고릴라', '침팬지'] },
@@ -305,7 +329,7 @@
             { question: 'ノート', answer: '노트', row: '나행', options: ['노트', '책', '연필', '지우개'] }
         ];
 
-        // 📌 [소제목 4] 생활 회화 및 문장 데이터
+        // 📚 4. 생활 회화 및 문장 데이터
         const sentenceData = [
             { question: 'おはようございます', answer: '안녕하세요(아침)', row: '회화', options: ['안녕하세요(아침)', '감사합니다', '죄송합니다', '안녕히 계세요'] },
             { question: 'こんにちは', answer: '안녕하세요(낮)', row: '회화', options: ['안녕하세요(낮)', '처음 뵙겠습니다', '잘 먹겠습니다', '네, 알겠습니다'] },
@@ -320,21 +344,23 @@
         ];
 
 <!-- ================================================== -->
-<!-- 🧠 [3단원] 퀴즈 방향 전환 & 원어민 발음(TTS) 마법 로직 🧠 -->
+<!-- 🧠 [3단원] 게임 진행 및 마법 로직 (자바스크립트 끝) 🧠 -->
 <!-- ================================================== -->
-        // 📌 [소제목 5] 게임 상태 및 방향 설정 변수
-        let currentMode = ''; 
-        let currentModeData = []; 
-        let quizData = []; 
-        let currentQuizIndex = 0;
-        let score = 0;
-        let isFirstTry = true; 
+        // ⚙️ 5. 게임 상태 변수 모음
+        let currentMode = '';           // 현재 모드 (hiragana, katakana, word, sentence)
+        let currentModeData = [];       // 선택된 모드의 전체 데이터
+        let quizData = [];              // 범위 필터링 & 섞인 실제 퀴즈 데이터
+        let currentQuizIndex = 0;       // 현재 문제 번호
+        let score = 0;                  // 점수
+        let isFirstTry = true;          // 첫 시도에 맞췄는지 여부
+        
+        // 기본으로 켜둘 학습 범위 설정 (회화 포함)
         let selectedRanges = ['아행', '카행', '사행', '타행', '나행', '회화'];
         
-        // 💡 퀴즈 방향 변수 추가 (기본값: 일본어 -> 한국어)
+        // 💡 퀴즈 출제 방향 (기본값: 일본어 -> 한국어)
         let quizDirection = 'jp_to_kr'; 
 
-        // 📌 [소제목 6] 퀴즈 방향 변경 로직
+        // 🔄 6. 퀴즈 방향 변경 로직
         function setDirection(dir) {
             quizDirection = dir;
             document.getElementById('dirJpToKr').classList.remove('active');
@@ -347,7 +373,7 @@
             }
         }
 
-        // 📌 [소제목 7] 태그 클릭 시 범위 껐다 켜기 로직
+        // 🎛️ 7. 태그 클릭 시 학습 범위 껐다 켜기
         function toggleRange(rangeName, element) {
             if (selectedRanges.includes(rangeName)) {
                 if (selectedRanges.length === 1) {
@@ -362,7 +388,7 @@
             }
         }
 
-        // 📌 [소제목 8] 화면 전환 및 데이터 필터링
+        // 🚀 8. 게임 시작 및 데이터 필터링
         function startGame(mode) {
             currentMode = mode;
             document.getElementById('mainScreen').classList.remove('active-screen');
@@ -383,6 +409,7 @@
                 baseData = sentenceData;
             }
 
+            // 선택한 태그에 맞는 데이터만 쏙쏙 뽑아오기
             currentModeData = baseData.filter(item => {
                 let itemRow = item.row || item.path.split('/')[1]; 
                 if (!itemRow && item.answer === '응') itemRow = '와행';
@@ -398,11 +425,13 @@
             initGame();
         }
 
+        // 🏠 9. 홈으로 돌아가기
         function goHome() {
             document.getElementById('quizScreen').classList.remove('active-screen');
             document.getElementById('mainScreen').classList.add('active-screen');
         }
 
+        // 🔀 10. 배열 섞기 (랜덤 마법)
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -410,6 +439,7 @@
             }
         }
 
+        // 🎬 11. 퀴즈 초기화 세팅
         function initGame() {
             quizData = [...currentModeData]; 
             shuffleArray(quizData); 
@@ -418,7 +448,7 @@
             loadQuiz();
         }
 
-        // 📌 [소제목 9] 화면 세팅 (방향 전환 & 스마트 글자 크기 조절)
+        // 📺 12. 화면에 문제 띄우기 (스마트 폰트 조절 & 방향 전환 적용)
         function loadQuiz() {
             const currentQuiz = quizData[currentQuizIndex];
             isFirstTry = true; 
@@ -428,7 +458,7 @@
 
             // 💡 퀴즈 방향에 따라 문제와 보기를 다르게 세팅!
             if (quizDirection === 'jp_to_kr') {
-                // 일본어 보고 한국어 맞추기
+                // 🇯🇵 일본어 보고 -> 🇰🇷 한국어 뜻 맞추기
                 displayQuestion = currentQuiz.question;
                 displayOptions = [...currentQuiz.options];
                 
@@ -440,7 +470,7 @@
                     document.getElementById('hintBtn').style.display = 'inline-block';
                 }
             } else {
-                // 한국어 보고 일본어 맞추기
+                // 🇰🇷 한국어 뜻 보고 -> 🇯🇵 일본어 맞추기
                 displayQuestion = currentQuiz.answer;
                 displayOptions.push(currentQuiz.question); // 정답 하나 넣고
                 
@@ -463,7 +493,7 @@
             const questionEl = document.getElementById('questionText');
             questionEl.innerText = displayQuestion;
             
-            // 💡 글자 크기 자동 조절 (한글/일본어 상관없이 길이에 맞춰서!)
+            // 💡 스마트 글자 크기 자동 조절 (한글/일본어 상관없이 길이에 맞춰서 예쁘게!)
             const textLen = displayQuestion.length;
             if (textLen === 1) questionEl.style.fontSize = '6rem';
             else if (textLen <= 3) questionEl.style.fontSize = '4.5rem';
@@ -471,6 +501,7 @@
             else if (textLen <= 7) questionEl.style.fontSize = '2.2rem';
             else questionEl.style.fontSize = '1.8rem';
             
+            // 보기 4개를 섞어서 버튼에 넣기
             shuffleArray(displayOptions);
 
             for (let i = 0; i < 4; i++) {
@@ -485,13 +516,13 @@
             document.getElementById('score').innerText = `${score} / ${quizData.length}`;
         }
 
-        // 📌 [소제목 10] 정답 채점 로직
+        // ✅ 13. 정답 채점 로직
         function checkAnswer(selectedIndex) {
             const currentQuiz = quizData[currentQuizIndex];
             const selectedBtn = document.getElementById('btn' + selectedIndex);
             const selectedText = selectedBtn.dataset.originalText; 
 
-            // 💡 방향에 따라 정답 비교 대상이 달라짐!
+            // 방향에 따라 정답 비교 대상이 달라짐!
             const correctAnswer = (quizDirection === 'jp_to_kr') ? currentQuiz.answer : currentQuiz.question;
 
             if (selectedText === correctAnswer) {
@@ -522,20 +553,37 @@
             }
         }
 
-        // 📌 [소제목 11] 🔊 원어민 발음 읽어주기 (TTS 마법!)
-        function playTTS() {
-            // 화면에 한국어가 떠있든 일본어가 떠있든, 읽어주는 건 무조건 '일본어 정답'이어야 해!
+        // 🔊 14. 원어민 발음 읽어주기 (남/여 선택 마법)
+        function playTTS(gender) {
+            // 방향 상관없이 읽어야 할 텍스트는 무조건 '일본어 원문'
             const textToRead = quizData[currentQuizIndex].question; 
             
-            // 스마트폰에 내장된 음성 합성 엔진(TTS)을 부르는 코드
             const utterance = new SpeechSynthesisUtterance(textToRead);
-            utterance.lang = 'ja-JP'; // 일본어로 읽어줘!
-            utterance.rate = 0.85;    // 초보자가 듣기 좋게 살짝 천천히! (1.0이 기본)
+            utterance.lang = 'ja-JP'; 
+            utterance.rate = 0.85; // 초보자가 듣기 좋게 살짝 천천히
+            
+            const voices = window.speechSynthesis.getVoices();
+            const jpVoices = voices.filter(voice => voice.lang.includes('ja'));
+            
+            if (jpVoices.length > 0) {
+                let selectedVoice = null;
+
+                if (gender === 'female') {
+                    // 아이폰 대표 여자 성우(Kyoko) 또는 female 포함 목소리 찾기
+                    selectedVoice = jpVoices.find(voice => voice.name.includes('Kyoko') || voice.name.toLowerCase().includes('female'));
+                } else if (gender === 'male') {
+                    // 아이폰 대표 남자 성우(Otoya, Osamu) 또는 male 포함 목소리 찾기
+                    selectedVoice = jpVoices.find(voice => voice.name.includes('Otoya') || voice.name.includes('Osamu') || (voice.name.toLowerCase().includes('male') && !voice.name.toLowerCase().includes('female')));
+                }
+                
+                // 선택한 성우가 기기에 없으면 기본 첫 번째 성우로 자동 재생
+                utterance.voice = selectedVoice || jpVoices[0];
+            }
             
             window.speechSynthesis.speak(utterance);
         }
 
-        // 📌 [소제목 12] 획순 보기 팝업 제어
+        // ✍️ 15. 획순 보기 팝업 제어
         function showStrokeOrder() {
             const currentQuiz = quizData[currentQuizIndex];
             document.getElementById('modalTitle').innerText = `${currentQuiz.question} 쓰는 순서`;

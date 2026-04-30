@@ -1,5 +1,5 @@
 <!-- ================================================== -->
-<!-- 🏆 [1단원] 앱의 뼈대와 범위 선택 기능 (HTML & CSS) 🏆 -->
+<!-- 🏆 [1단원] 단어 퀴즈 모드가 추가된 화면 구성 (HTML & CSS) 🏆 -->
 <!-- ================================================== -->
 <!DOCTYPE html>
 <html lang="ko">
@@ -10,60 +10,35 @@
     
     <!-- 📌 [소제목 1] 앱 디자인 스타일 (CSS) -->
     <style>
-        body {
-            margin: 0; padding: 0; background-color: #121212; color: #e0e0e0;
-            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-            height: 100vh; overflow: hidden; 
-        }
-
+        body { margin: 0; padding: 0; background-color: #121212; color: #e0e0e0; font-family: 'Apple SD Gothic Neo', sans-serif; height: 100vh; overflow: hidden; }
         .screen { display: none; flex-direction: column; height: 100vh; }
         .active-screen { display: flex; } 
-
-        header {
-            text-align: center; padding: 20px; font-size: 1.2rem; font-weight: bold;
-            background-color: #1e1e1e; box-shadow: 0 2px 10px rgba(0,0,0,0.5); color: #ffffff;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .score-board { font-size: 1rem; color: #bb86fc; }
-
-        .back-btn {
-            background: none; border: none; color: #aaa; font-size: 1rem;
-            font-weight: bold; cursor: pointer; padding: 0;
-        }
+        header { text-align: center; padding: 20px; font-size: 1.2rem; font-weight: bold; background-color: #1e1e1e; display: flex; justify-content: space-between; align-items: center; }
+        .back-btn { background: none; border: none; color: #aaa; font-size: 1rem; font-weight: bold; cursor: pointer; padding: 0; }
         .back-btn:hover { color: #fff; }
         
-        .center-container { flex: 1; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+        .center-container { flex: 1; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
         
-        /* 💡 추가됨: 학습 범위 선택 태그 디자인 */
-        .range-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 30px; max-width: 350px; }
-        .range-tag {
-            padding: 8px 15px; border-radius: 20px; border: 1px solid #bb86fc;
-            color: #bb86fc; cursor: pointer; transition: 0.2s; font-size: 0.95rem; font-weight: bold;
-        }
+        /* 💡 추가됨: 단어 모드일 때 뜻(한글)을 보여줄 힌트 텍스트 */
+        .meaning-hint { font-size: 1.2rem; color: #bb86fc; margin-bottom: 10px; font-weight: bold; }
+        
+        /* 글자 크기를 살짝 줄이고, 단어가 길어도 안 깨지게 조정 */
+        .japanese-char { font-size: 6rem; font-weight: bold; color: #ffffff; text-shadow: 0 4px 15px rgba(255, 255, 255, 0.15); margin-bottom: 20px; text-align: center; word-break: keep-all; }
+
+        .range-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 25px; max-width: 350px; }
+        .range-tag { padding: 8px 12px; border-radius: 20px; border: 1px solid #bb86fc; color: #bb86fc; cursor: pointer; transition: 0.2s; font-size: 0.9rem; font-weight: bold; }
         .range-tag.active { background-color: #bb86fc; color: #121212; }
 
-        .menu-btn {
-            padding: 15px 30px; font-size: 1.3rem; font-weight: bold; margin: 10px;
-            background-color: #1e1e1e; color: #e0e0e0; border: 2px solid #bb86fc;
-            border-radius: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(187, 134, 252, 0.2);
-        }
+        .menu-btn { padding: 15px 30px; font-size: 1.2rem; font-weight: bold; margin: 8px; background-color: #1e1e1e; color: #e0e0e0; border: 2px solid #bb86fc; border-radius: 15px; cursor: pointer; width: 260px; transition: 0.2s; box-shadow: 0 4px 10px rgba(187, 134, 252, 0.2); }
         .menu-btn:hover { background-color: #bb86fc; color: #121212; }
+        
+        /* 💡 단어 모드 버튼은 포인트를 줘서 구분! */
+        .menu-btn.word-mode { border-color: #03dac6; color: #03dac6; box-shadow: 0 4px 10px rgba(3, 218, 198, 0.2); }
+        .menu-btn.word-mode:hover { background-color: #03dac6; color: #121212; }
 
-        .japanese-char {
-            font-size: 8rem; font-weight: bold; color: #ffffff;
-            text-shadow: 0 4px 15px rgba(255, 255, 255, 0.15); margin-bottom: 20px;
-        }
-
-        #hintBtn {
-            padding: 10px 20px; font-size: 1rem; font-weight: bold; background-color: #333; color: #bb86fc;
-            border: 1px solid #bb86fc; border-radius: 20px; cursor: pointer; transition: 0.2s; margin-bottom: 20px;
-        }
-        #hintBtn:hover { background-color: #bb86fc; color: #121212; }
-        .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; margin-bottom: 20px; }
-        .option-btn {
-            padding: 20px; font-size: 1.5rem; font-weight: bold; border: 1px solid #333; border-radius: 15px;
-            background-color: #2c2c2c; color: #ffffff; box-shadow: 0 4px 6px rgba(0,0,0,0.3); cursor: pointer; transition: all 0.2s ease;
-        }
+        .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; margin-bottom: 10px; }
+        /* 단어 퀴즈 보기도 글자가 길 수 있으니 폰트 조절 */
+        .option-btn { padding: 15px 10px; font-size: 1.2rem; font-weight: bold; border: 1px solid #333; border-radius: 15px; background-color: #2c2c2c; color: #ffffff; cursor: pointer; transition: all 0.2s ease; word-break: keep-all; }
         .option-btn:active { transform: scale(0.95); }
         .option-btn:disabled { cursor: not-allowed; opacity: 0.8; }
         .correct { background-color: #4CAF50 !important; color: white !important; border-color: #4CAF50 !important; }
@@ -78,28 +53,30 @@
 </head>
 <body>
 
-    <!-- 📌 [소제목 2] 🏠 메인 화면 (학습 범위 선택 추가!) -->
+    <!-- 📌 [소제목 2] 🏠 메인 화면 -->
     <div id="mainScreen" class="screen active-screen">
         <header style="justify-content: center;">이즈의 일본어 튜터</header>
         <div class="center-container">
             
-            <!-- 💡 추가됨: 내가 원하는 행만 고르는 태그 버튼들 -->
-            <div style="margin-bottom: 15px; color: #aaa; font-size: 0.9rem;">학습할 범위를 껐다 켤 수 있어!</div>
+            <div style="margin-bottom: 10px; color: #aaa; font-size: 0.9rem;">학습할 범위를 껐다 켤 수 있어!</div>
             <div class="range-grid">
+                <!-- 이즈 진도에 맞춰서 '나행'까지만 기본으로 켜두고 시작할게! -->
                 <div class="range-tag active" onclick="toggleRange('아행', this)">아행</div>
                 <div class="range-tag active" onclick="toggleRange('카행', this)">카행</div>
                 <div class="range-tag active" onclick="toggleRange('사행', this)">사행</div>
                 <div class="range-tag active" onclick="toggleRange('타행', this)">타행</div>
                 <div class="range-tag active" onclick="toggleRange('나행', this)">나행</div>
-                <div class="range-tag active" onclick="toggleRange('하행', this)">하행</div>
-                <div class="range-tag active" onclick="toggleRange('마행', this)">마행</div>
-                <div class="range-tag active" onclick="toggleRange('야행', this)">야행</div>
-                <div class="range-tag active" onclick="toggleRange('라행', this)">라행</div>
-                <div class="range-tag active" onclick="toggleRange('와행', this)">와행(응)</div>
+                <div class="range-tag" onclick="toggleRange('하행', this)">하행</div>
+                <div class="range-tag" onclick="toggleRange('마행', this)">마행</div>
+                <div class="range-tag" onclick="toggleRange('야행', this)">야행</div>
+                <div class="range-tag" onclick="toggleRange('라행', this)">라행</div>
+                <div class="range-tag" onclick="toggleRange('와행', this)">와행(응)</div>
             </div>
 
-            <button class="menu-btn" onclick="startGame('hiragana')">あ 히라가나 시작</button>
-            <button class="menu-btn" onclick="startGame('katakana')">ア 가타카나 시작</button>
+            <button class="menu-btn" onclick="startGame('hiragana')">あ 히라가나 낱글자</button>
+            <button class="menu-btn" onclick="startGame('katakana')">ア 가타카나 낱글자</button>
+            <!-- 💡 추가됨: 단어 퀴즈 시작 버튼 -->
+            <button class="menu-btn word-mode" onclick="startGame('word')">🍎 교재 속 단어 퀴즈</button>
         </div>
     </div>
 
@@ -112,7 +89,10 @@
         </header>
 
         <div class="center-container">
+            <!-- 💡 추가됨: 이 단어의 뜻은? 이라는 힌트를 보여줄 공간 -->
+            <div id="meaningHint" class="meaning-hint"></div>
             <div class="japanese-char" id="questionText">あ</div>
+            <!-- 단어 모드일 때는 획순 보기가 필요 없어서 자바스크립트로 숨길 거야 -->
             <button id="hintBtn" onclick="showStrokeOrder()">획순 보기 ✍️</button>
         </div>
 
@@ -134,10 +114,10 @@
     </div>
 
 <!-- ================================================== -->
-<!-- 🧠 [2단원] 선택한 범위만 출제하는 로직 (JavaScript) 🧠 -->
+<!-- 🧠 [2단원] 사진 속 90개 단어 데이터 및 통합 로직 (JavaScript) 🧠 -->
 <!-- ================================================== -->
     <script>
-        // 📌 [소제목 1] 히라가나 & 가타카나 데이터 창고 (기존과 동일)
+        // 📌 [소제목 1] 히라가나 낱글자 데이터 (기존 유지)
         const hiraganaData = [
             { question: 'あ', answer: '아', path: '히라가나/아행', options: ['아', '이', '우', '에'] },
             { question: 'い', answer: '이', path: '히라가나/아행', options: ['이', '카', '키', '사'] },
@@ -187,6 +167,7 @@
             { question: 'ん', answer: '응', path: '히라가나', options: ['응', '와', '음', '은'] }
         ];
 
+        // 📌 [소제목 2] 가타카나 낱글자 데이터 (기존 유지)
         const katakanaData = [
             { question: 'ア', answer: '아', path: '가타카나/아행', options: ['아', '이', '우', '에'] },
             { question: 'イ', answer: '이', path: '가타카나/아행', options: ['이', '카', '키', '사'] },
@@ -221,7 +202,7 @@
             { question: 'マ', answer: '마', path: '가타카나/마행', options: ['마', '미', '나', '하'] },
             { question: 'ミ', answer: '미', path: '가타카나/마행', options: ['미', '무', '니', '히'] },
             { question: 'ム', answer: '무', path: '가타카나/마행', options: ['무', '메', '누', '후'] },
-            { question: 'メ', answer: '메', path: '가타카나/마행', options: ['メ', '모', '네', '헤'] },
+            { question: 'メ', answer: '메', path: '가타카나/마행', options: ['메', '모', '네', '헤'] },
             { question: 'モ', answer: '모', path: '가타카나/마행', options: ['모', '마', '노', '호'] },
             { question: 'ヤ', answer: '야', path: '가타카나/야행', options: ['야', '유', '아', '라'] },
             { question: 'ユ', answer: '유', path: '가타카나/야행', options: ['유', '요', '우', '루'] },
@@ -236,20 +217,118 @@
             { question: 'ン', answer: '응', path: '가타카나', options: ['응', '와', '음', '은'] }
         ];
 
-        // 📌 [소제목 2] 게임 상태 및 💡범위 선택 변수
+        // 📌 [소제목 3] 💡 교재 사진 완벽 분석! 히라가나 & 가타카나 통합 단어 데이터
+        const wordData = [
+            // --- 히라가나 교재 단어 ---
+            { question: 'あかちゃん', answer: '아기', row: '아행', options: ['아기', '사과', '연필', '왕'] },
+            { question: 'いちご', answer: '딸기', row: '아행', options: ['딸기', '의자', '거북이', '다리미'] },
+            { question: 'うさぎ', answer: '토끼', row: '아행', options: ['토끼', '바다', '고양이', '고기'] },
+            { question: 'えんぴつ', answer: '연필', row: '아행', options: ['연필', '그림', '얼굴', '다리'] },
+            { question: 'おう', answer: '왕', row: '아행', options: ['왕', '오이', '어머니', '학교'] },
+            { question: 'かめ', answer: '거북이', row: '카행', options: ['거북이', '우산', '가방', '모자'] },
+            { question: 'きんぎょ', answer: '금붕어', row: '카행', options: ['금붕어', '기차', '나무', '포도'] },
+            { question: 'くり', answer: '밤', row: '카행', options: ['밤', '구름', '비행기', '사자'] },
+            { question: 'けむり', answer: '연기', row: '카행', options: ['연기', '풍선', '바지', '치마'] },
+            { question: 'こま', answer: '팽이', row: '카행', options: ['팽이', '코끼리', '돼지', '오리'] },
+            { question: 'さる', answer: '원숭이', row: '사행', options: ['원숭이', '사슴', '수박', '매미'] },
+            { question: 'しか', answer: '사슴', row: '사행', options: ['사슴', '사자', '소', '뱀'] },
+            { question: 'すいか', answer: '수박', row: '사행', options: ['수박', '딸기', '참외', '포도'] },
+            { question: 'せみ', answer: '매미', row: '사행', options: ['매미', '거미', '나비', '개미'] },
+            { question: 'そば', answer: '메밀국수', row: '사행', options: ['메밀국수', '우동', '라면', '까치'] },
+            { question: 'たんぽぽ', answer: '민들레', row: '타행', options: ['민들레', '해바라기', '장미', '나비'] },
+            { question: 'ちょう', answer: '나비', row: '타행', options: ['나비', '벌', '새', '구름'] },
+            { question: 'つばめ', answer: '제비', row: '타행', options: ['제비', '참새', '독수리', '장갑'] },
+            { question: 'てぶくろ', answer: '장갑', row: '타행', options: ['장갑', '양말', '모자', '등대'] },
+            { question: 'とうだい', answer: '등대', row: '타행', options: ['등대', '바다', '배', '산'] },
+            { question: 'なす', answer: '가지', row: '나행', options: ['가지', '오이', '당근', '무'] },
+            { question: 'にわとり', answer: '닭', row: '나행', options: ['닭', '병아리', '오리', '고양이'] },
+            { question: 'ぬいぐるみ', answer: '봉제인형', row: '나행', options: ['봉제인형', '로봇', '공', '톱'] },
+            { question: 'ねこ', answer: '고양이', row: '나행', options: ['고양이', '강아지', '호랑이', '사자'] },
+            { question: 'のこぎり', answer: '톱', row: '나행', options: ['톱', '망치', '가위', '칼'] },
+            { question: 'はさみ', answer: '가위', row: '하행', options: ['가위', '칼', '풀', '자'] },
+            { question: 'ひよこ', answer: '병아리', row: '하행', options: ['병아리', '닭', '오리', '새'] },
+            { question: 'ふうせん', answer: '풍선', row: '하행', options: ['풍선', '공', '비행기', '구름'] },
+            { question: 'へび', answer: '뱀', row: '하행', options: ['뱀', '개구리', '지렁이', '거북이'] },
+            { question: 'ほん', answer: '책', row: '하행', options: ['책', '공책', '연필', '지우개'] },
+            { question: 'まじょ', answer: '마녀', row: '마행', options: ['마녀', '요정', '마법사', '귀신'] },
+            { question: 'みかん', answer: '귤', row: '마행', options: ['귤', '사과', '바나나', '포도'] },
+            { question: 'むし', answer: '벌레', row: '마행', options: ['벌레', '나비', '매미', '파리'] },
+            { question: 'めがね', answer: '안경', row: '마행', options: ['안경', '모자', '거울', '창문'] },
+            { question: 'もみじ', answer: '단풍', row: '마행', options: ['단풍', '벚꽃', '나무', '잎'] },
+            { question: 'やかん', answer: '주전자', row: '야행', options: ['주전자', '컵', '냄비', '그릇'] },
+            { question: 'ゆり', answer: '백합', row: '야행', options: ['백합', '장미', '무궁화', '튤립'] },
+            { question: 'ようせい', answer: '요정', row: '야행', options: ['요정', '마녀', '천사', '사람'] },
+            { question: 'らっぱ', answer: '나팔', row: '라행', options: ['나팔', '피리', '피아노', '기타'] },
+            { question: 'りす', answer: '다람쥐', row: '라행', options: ['다람쥐', '토끼', '쥐', '고양이'] },
+            { question: 'るすばん', answer: '빈집지킴', row: '라행', options: ['빈집지킴', '도둑', '경찰', '손님'] },
+            { question: 'れいぞうこ', answer: '냉장고', row: '라행', options: ['냉장고', '세탁기', '텔레비전', '에어컨'] },
+            { question: 'ろうそく', answer: '양초', row: '라행', options: ['양초', '전등', '불', '성냥'] },
+            { question: 'わし', answer: '독수리', row: '와행', options: ['독수리', '참새', '제비', '까마귀'] },
+            { question: 'てをあらう', answer: '손을씻다', row: '와행', options: ['손을씻다', '세수하다', '목욕하다', '청소하다'] },
+            { question: 'にんじん', answer: '당근', row: '와행', options: ['당근', '오이', '가지', '무'] },
+
+            // --- 가타카나 교재 단어 ---
+            { question: 'アイロン', answer: '다리미', row: '아행', options: ['다리미', '세탁기', '청소기', '선풍기'] },
+            { question: 'イルカ', answer: '돌고래', row: '아행', options: ['돌고래', '상어', '고래', '물고기'] },
+            { question: 'オランウータン', answer: '오랑우탄', row: '아행', options: ['오랑우탄', '원숭이', '고릴라', '침팬지'] },
+            { question: 'エプロン', answer: '앞치마', row: '아행', options: ['앞치마', '바지', '치마', '모자'] },
+            { question: 'オレンジ', answer: '오렌지', row: '아행', options: ['오렌지', '사과', '포도', '딸기'] },
+            { question: 'カー', answer: '자동차', row: '카행', options: ['자동차', '버스', '기차', '자전거'] },
+            { question: 'キャベツ', answer: '양배추', row: '카행', options: ['양배추', '상추', '당근', '오이'] },
+            { question: 'クレヨン', answer: '크레용', row: '카행', options: ['크레용', '연필', '볼펜', '지우개'] },
+            { question: 'ケーキ', answer: '케이크', row: '카행', options: ['케이크', '빵', '과자', '초콜릿'] },
+            { question: 'コアラ', answer: '코알라', row: '카행', options: ['코알라', '판다', '곰', '호랑이'] },
+            { question: 'サンドイッチ', answer: '샌드위치', row: '사행', options: ['샌드위치', '햄버거', '피자', '빵'] },
+            { question: 'シーディー', answer: 'CD', row: '사행', options: ['CD', '테이프', '라디오', '책'] },
+            { question: 'スリッパ', answer: '슬리퍼', row: '사행', options: ['슬리퍼', '구두', '운동화', '장화'] },
+            { question: 'セーター', answer: '스웨터', row: '사행', options: ['스웨터', '셔츠', '바지', '치마'] },
+            { question: 'ソーセージ', answer: '소시지', row: '사행', options: ['소시지', '햄', '고기', '생선'] },
+            { question: 'タンバリン', answer: '탬버린', row: '타행', options: ['탬버린', '피아노', '기타', '드럼'] },
+            { question: 'チーズ', answer: '치즈', row: '타행', options: ['치즈', '우유', '버터', '빵'] },
+            { question: 'ツリー', answer: '트리', row: '타행', options: ['트리', '나무', '꽃', '풀'] },
+            { question: 'テレビ', answer: '텔레비전', row: '타행', options: ['텔레비전', '컴퓨터', '라디오', '전화기'] },
+            { question: 'トマト', answer: '토마토', row: '타행', options: ['토마토', '사과', '딸기', '수박'] },
+            { question: 'ナイフ', answer: '나이프', row: '나행', options: ['나이프', '포크', '숟가락', '가위'] },
+            { question: 'ニュース', answer: '뉴스', row: '나행', options: ['뉴스', '드라마', '영화', '만화'] },
+            { question: 'カヌー', answer: '카누', row: '나행', options: ['카누', '배', '비행기', '자동차'] },
+            { question: 'ネクタイ', answer: '넥타이', row: '나행', options: ['넥타이', '모자', '장갑', '양말'] },
+            { question: 'ノート', answer: '노트', row: '나행', options: ['노트', '책', '연필', '지우개'] },
+            { question: 'ハーモニカ', answer: '하모니카', row: '하행', options: ['하모니카', '피아노', '기타', '드럼'] },
+            { question: 'ヒーター', answer: '히터', row: '하행', options: ['히터', '에어컨', '선풍기', '냉장고'] },
+            { question: 'フォーク', answer: '포크', row: '하행', options: ['포크', '나이프', '숟가락', '젓가락'] },
+            { question: 'ヘリコプター', answer: '헬리콥터', row: '하행', options: ['헬리콥터', '비행기', '자동차', '기차'] },
+            { question: 'ホチキス', answer: '호치키스', row: '하행', options: ['호치키스', '가위', '풀', '테이프'] },
+            { question: 'マッチ', answer: '성냥', row: '마행', options: ['성냥', '라이터', '양초', '불'] },
+            { question: 'ミルク', answer: '우유', row: '마행', options: ['우유', '물', '주스', '커피'] },
+            { question: 'アイスクリーム', answer: '아이스크림', row: '마행', options: ['아이스크림', '과자', '빵', '사탕'] },
+            { question: 'メロン', answer: '멜론', row: '마행', options: ['멜론', '수박', '사과', '포도'] },
+            { question: 'モノレール', answer: '모노레일', row: '마행', options: ['모노레일', '기차', '버스', '택시'] },
+            { question: 'キャッチャー', answer: '포수', row: '야행', options: ['포수', '투수', '타자', '심판'] },
+            { question: 'ユニホーム', answer: '유니폼', row: '야행', options: ['유니폼', '모자', '신발', '가방'] },
+            { question: 'ヨーグルト', answer: '요구르트', row: '야행', options: ['요구르트', '우유', '치즈', '버터'] },
+            { question: 'ラケット', answer: '라켓', row: '라행', options: ['라켓', '공', '글러브', '배트'] },
+            { question: 'リボン', answer: '리본', row: '라행', options: ['리본', '모자', '머리띠', '목걸이'] },
+            { question: 'キャラメル', answer: '캐러멜', row: '라행', options: ['캐러멜', '초콜릿', '사탕', '과자'] },
+            { question: 'レモン', answer: '레몬', row: '라행', options: ['레몬', '사과', '오렌지', '귤'] },
+            { question: 'ロープウェー', answer: '로프웨이', row: '라행', options: ['로프웨이', '기차', '버스', '비행기'] },
+            { question: 'ワイシャツ', answer: '와이셔츠', row: '와행', options: ['와이셔츠', '바지', '치마', '모자'] },
+            { question: 'パンダ', answer: '판다', row: '와행', options: ['판다', '곰', '코알라', '토끼'] }
+        ];
+
+        // 📌 [소제목 4] 게임 상태 및 범위 선택 변수
+        let currentMode = ''; 
         let currentModeData = []; 
         let quizData = []; 
         let currentQuizIndex = 0;
         let score = 0;
         let isFirstTry = true; 
         
-        // 기본적으로 모든 행이 선택된 상태로 시작!
-        let selectedRanges = ['아행', '카행', '사행', '타행', '나행', '하행', '마행', '야행', '라행', '와행'];
+        // 이즈의 진도를 고려해서 기본적으로 '나행'까지만 켜지게 설정!
+        let selectedRanges = ['아행', '카행', '사행', '타행', '나행'];
 
-        // 📌 [소제목 3] 태그 클릭 시 범위 껐다 켜기 로직
+        // 📌 [소제목 5] 태그 클릭 시 범위 껐다 켜기 로직
         function toggleRange(rangeName, element) {
             if (selectedRanges.includes(rangeName)) {
-                // 이미 선택된 걸 끄려고 할 때, 마지막 1개는 못 끄게 막기!
                 if (selectedRanges.length === 1) {
                     alert('최소 하나의 행은 선택하고 공부해야지!');
                     return;
@@ -257,14 +336,14 @@
                 selectedRanges = selectedRanges.filter(r => r !== rangeName);
                 element.classList.remove('active');
             } else {
-                // 꺼진 걸 다시 켤 때
                 selectedRanges.push(rangeName);
                 element.classList.add('active');
             }
         }
 
-        // 📌 [소제목 4] 화면 전환 및 💡선택한 범위만 추출하는 로직
+        // 📌 [소제목 6] 화면 전환 및 범위 필터링 로직
         function startGame(mode) {
+            currentMode = mode;
             document.getElementById('mainScreen').classList.remove('active-screen');
             document.getElementById('quizScreen').classList.add('active-screen');
 
@@ -275,25 +354,33 @@
             } else if (mode === 'katakana') {
                 document.getElementById('quizTitle').innerText = '가타카나 퀴즈';
                 baseData = katakanaData;
+            } else if (mode === 'word') {
+                document.getElementById('quizTitle').innerText = '단어 퀴즈';
+                baseData = wordData;
             }
 
-            // 💡 이즈가 선택한 태그(행)에 해당하는 문제만 쏙쏙 걸러내기!
+            // 선택한 범위(태그)에 맞는 문제만 추출
             currentModeData = baseData.filter(item => {
-                let itemRow = item.path.split('/')[1]; // 폴더 경로에서 '아행' 추출
-                if (!itemRow && item.answer === '응') itemRow = '와행'; // 경로가 없는 '응'은 와행으로 묶기
+                let itemRow = item.row || item.path.split('/')[1]; 
+                if (!itemRow && item.answer === '응') itemRow = '와행';
                 return selectedRanges.includes(itemRow);
             });
+
+            if (currentModeData.length === 0) {
+                alert('앗, 선택한 범위에 해당하는 문제가 없어! 범위를 더 넓혀봐.');
+                goHome();
+                return;
+            }
 
             initGame();
         }
 
-        // '홈으로' 버튼 눌렀을 때
         function goHome() {
             document.getElementById('quizScreen').classList.remove('active-screen');
             document.getElementById('mainScreen').classList.add('active-screen');
         }
 
-        // 📌 [소제목 5] 무작위 섞기 기능
+        // 📌 [소제목 7] 섞기 및 퀴즈 초기화
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -301,7 +388,6 @@
             }
         }
 
-        // 📌 [소제목 6] 게임 초기화 및 시작
         function initGame() {
             quizData = [...currentModeData]; 
             shuffleArray(quizData); 
@@ -310,11 +396,20 @@
             loadQuiz();
         }
 
-        // 📌 [소제목 7] 화면에 문제 세팅하기
+        // 📌 [소제목 8] 화면에 문제 세팅하기 (단어 모드 시 힌트 표시)
         function loadQuiz() {
             const currentQuiz = quizData[currentQuizIndex];
             isFirstTry = true; 
             
+            // 💡 단어 모드일 때는 '이 단어의 뜻은?' 문구를 표시하고 획순 보기를 숨김
+            if (currentMode === 'word') {
+                document.getElementById('meaningHint').innerText = "이 단어의 뜻은?";
+                document.getElementById('hintBtn').style.display = 'none';
+            } else {
+                document.getElementById('meaningHint').innerText = "";
+                document.getElementById('hintBtn').style.display = 'inline-block';
+            }
+
             document.getElementById('questionText').innerText = currentQuiz.question;
             
             let shuffledOptions = [...currentQuiz.options];
@@ -329,10 +424,10 @@
                 btn.style.opacity = '1';
             }
             
-            document.getElementById('score').innerText = `${score} / ${quizData.length}`; // 문제 수도 선택한 만큼 줄어듦!
+            document.getElementById('score').innerText = `${score} / ${quizData.length}`;
         }
 
-        // 📌 [소제목 8] 정답 채점 로직
+        // 📌 [소제목 9] 정답 채점 로직
         function checkAnswer(selectedIndex) {
             const currentQuiz = quizData[currentQuizIndex];
             const selectedBtn = document.getElementById('btn' + selectedIndex);
@@ -366,7 +461,7 @@
             }
         }
 
-        // 📌 [소제목 9] 획순 보기 팝업 제어
+        // 📌 [소제목 10] 획순 보기 팝업 제어 (낱글자 모드 전용)
         function showStrokeOrder() {
             const currentQuiz = quizData[currentQuizIndex];
             document.getElementById('modalTitle').innerText = `${currentQuiz.question} 쓰는 순서`;
@@ -380,4 +475,3 @@
     </script>
 </body>
 </html>
-

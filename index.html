@@ -30,13 +30,9 @@
         .meaning-hint { font-size: 1.2rem; color: #bb86fc; margin-bottom: 10px; font-weight: bold; text-align: center; }
         .japanese-char { font-weight: bold; color: #ffffff; text-shadow: 0 4px 15px rgba(255, 255, 255, 0.15); margin-bottom: 15px; text-align: center; word-break: keep-all; line-height: 1.2; width: 100%; }
 
-        /* 💡 6. 발음 듣기(TTS) 버튼 (여/남 디자인 분리) */
-        .tts-container { display: flex; gap: 15px; margin-bottom: 15px; }
-        .tts-btn { padding: 10px 20px; font-size: 1.1rem; background-color: #333; border-radius: 20px; cursor: pointer; transition: 0.2s; font-weight: bold; }
-        .tts-btn.female { color: #03dac6; border: 1px solid #03dac6; }
-        .tts-btn.female:hover { background-color: #03dac6; color: #121212; }
-        .tts-btn.male { color: #bb86fc; border: 1px solid #bb86fc; }
-        .tts-btn.male:hover { background-color: #bb86fc; color: #121212; }
+        /* 💡 6. 발음 듣기(TTS) 버튼 (단일 버튼으로 복구!) */
+        .tts-btn { padding: 10px 20px; font-size: 1.1rem; background-color: #333; color: #03dac6; border: 1px solid #03dac6; border-radius: 20px; cursor: pointer; transition: 0.2s; margin-bottom: 15px; font-weight: bold; }
+        .tts-btn:hover { background-color: #03dac6; color: #121212; }
 
         /* 🎨 7. 학습 범위 태그 */
         .range-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 25px; max-width: 350px; }
@@ -118,11 +114,8 @@
             <div id="meaningHint" class="meaning-hint"></div>
             <div class="japanese-char" id="questionText">あ</div>
             
-            <!-- 💡 발음 듣기 남/여 분리 버튼 -->
-            <div class="tts-container">
-                <button class="tts-btn female" onclick="playTTS('female')">👩🏻 여자 발음</button>
-                <button class="tts-btn male" onclick="playTTS('male')">👦🏻 남자 발음</button>
-            </div>
+            <!-- 💡 발음 듣기 단일 버튼 복구! -->
+            <button class="tts-btn" onclick="playTTS()">🔊 발음 듣기</button>
             
             <!-- 획순 보기 버튼 -->
             <button id="hintBtn" onclick="showStrokeOrder()" style="padding: 10px 20px; background-color: #333; color: #bb86fc; border: 1px solid #bb86fc; border-radius: 20px; cursor: pointer; font-weight: bold;">획순 보기 ✍️</button>
@@ -553,10 +546,10 @@
             }
         }
 
-        // 🔊 14. 원어민 발음 읽어주기 (남/여 선택 마법)
-        function playTTS(gender) {
+        // 🔊 14. 원어민 발음 읽어주기 (단일 버튼으로 통합!)
+        function playTTS() {
             // 방향 상관없이 읽어야 할 텍스트는 무조건 '일본어 원문'
-            const textToRead = quizData[currentQuizIndex].question; 
+            const textToRead = (quizDirection === 'jp_to_kr') ? quizData[currentQuizIndex].question : quizData[currentQuizIndex].answer; 
             
             const utterance = new SpeechSynthesisUtterance(textToRead);
             utterance.lang = 'ja-JP'; 
@@ -566,18 +559,9 @@
             const jpVoices = voices.filter(voice => voice.lang.includes('ja'));
             
             if (jpVoices.length > 0) {
-                let selectedVoice = null;
-
-                if (gender === 'female') {
-                    // 아이폰 대표 여자 성우(Kyoko) 또는 female 포함 목소리 찾기
-                    selectedVoice = jpVoices.find(voice => voice.name.includes('Kyoko') || voice.name.toLowerCase().includes('female'));
-                } else if (gender === 'male') {
-                    // 아이폰 대표 남자 성우(Otoya, Osamu) 또는 male 포함 목소리 찾기
-                    selectedVoice = jpVoices.find(voice => voice.name.includes('Otoya') || voice.name.includes('Osamu') || (voice.name.toLowerCase().includes('male') && !voice.name.toLowerCase().includes('female')));
-                }
-                
-                // 선택한 성우가 기기에 없으면 기본 첫 번째 성우로 자동 재생
-                utterance.voice = selectedVoice || jpVoices[0];
+                // 이즈가 선호했던 여자 목소리(Kyoko 등)를 1순위로 찾고, 없으면 기기 기본 목소리로 재생!
+                let femaleVoice = jpVoices.find(voice => voice.name.includes('Kyoko') || voice.name.toLowerCase().includes('female'));
+                utterance.voice = femaleVoice || jpVoices[0];
             }
             
             window.speechSynthesis.speak(utterance);

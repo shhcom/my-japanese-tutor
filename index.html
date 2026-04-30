@@ -546,23 +546,17 @@
             }
         }
 
-        // 🔊 14. 원어민 발음 읽어주기 (단일 버튼으로 통합!)
+        // 🔊 14. 원어민 발음 읽어주기 (아이폰 설정 완벽 연동!)
         function playTTS() {
             // 방향 상관없이 읽어야 할 텍스트는 무조건 '일본어 원문'
             const textToRead = (quizDirection === 'jp_to_kr') ? quizData[currentQuizIndex].question : quizData[currentQuizIndex].answer; 
             
             const utterance = new SpeechSynthesisUtterance(textToRead);
-            utterance.lang = 'ja-JP'; 
-            utterance.rate = 0.85; // 초보자가 듣기 좋게 살짝 천천히
+            utterance.lang = 'ja-JP'; // 일본어로 읽어줘!
+            utterance.rate = 0.85;    // 초보자가 듣기 좋게 살짝 천천히
             
-            const voices = window.speechSynthesis.getVoices();
-            const jpVoices = voices.filter(voice => voice.lang.includes('ja'));
-            
-            if (jpVoices.length > 0) {
-                // 이즈가 선호했던 여자 목소리(Kyoko 등)를 1순위로 찾고, 없으면 기기 기본 목소리로 재생!
-                let femaleVoice = jpVoices.find(voice => voice.name.includes('Kyoko') || voice.name.toLowerCase().includes('female'));
-                utterance.voice = femaleVoice || jpVoices[0];
-            }
+            // 💡 억지로 여자 성우(Kyoko)를 찾는 코드를 아예 없앴어!
+            // 이렇게 하면 무조건 이즈의 '기기 기본 설정' 목소리가 일관되게 나와.
             
             window.speechSynthesis.speak(utterance);
         }

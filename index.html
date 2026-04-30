@@ -1,5 +1,5 @@
 <!-- ================================================== -->
-<!-- 🏆 [1단원] 단어 퀴즈 모드가 추가된 화면 구성 (HTML & CSS) 🏆 -->
+<!-- 🏆 [1단원] 문장 및 회화 모드 추가 화면 구성 (HTML & CSS) 🏆 -->
 <!-- ================================================== -->
 <!DOCTYPE html>
 <html lang="ko">
@@ -8,8 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>이즈의 일본어 튜터</title>
     
-    <!-- 📌 [소제목 1] 앱 디자인 스타일 (CSS) -->
     <style>
+        /* 기본 스타일 */
         body { margin: 0; padding: 0; background-color: #121212; color: #e0e0e0; font-family: 'Apple SD Gothic Neo', sans-serif; height: 100vh; overflow: hidden; }
         .screen { display: none; flex-direction: column; height: 100vh; }
         .active-screen { display: flex; } 
@@ -17,13 +17,13 @@
         .back-btn { background: none; border: none; color: #aaa; font-size: 1rem; font-weight: bold; cursor: pointer; padding: 0; }
         .back-btn:hover { color: #fff; }
         
-        .center-container { flex: 1; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
+        .center-container { flex: 1; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; width: 100%; box-sizing: border-box; }
         
-        /* 💡 추가됨: 단어 모드일 때 뜻(한글)을 보여줄 힌트 텍스트 */
-        .meaning-hint { font-size: 1.2rem; color: #bb86fc; margin-bottom: 10px; font-weight: bold; }
+        /* 힌트 텍스트 */
+        .meaning-hint { font-size: 1.2rem; color: #bb86fc; margin-bottom: 10px; font-weight: bold; text-align: center; }
         
-        /* 글자 크기를 살짝 줄이고, 단어가 길어도 안 깨지게 조정 */
-        .japanese-char { font-size: 6rem; font-weight: bold; color: #ffffff; text-shadow: 0 4px 15px rgba(255, 255, 255, 0.15); margin-bottom: 20px; text-align: center; word-break: keep-all; }
+        /* 💡 문장이 길어질 것을 대비해 줄바꿈(line-height, width) 속성을 추가했어! */
+        .japanese-char { font-weight: bold; color: #ffffff; text-shadow: 0 4px 15px rgba(255, 255, 255, 0.15); margin-bottom: 20px; text-align: center; word-break: keep-all; line-height: 1.2; width: 100%; }
 
         .range-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 25px; max-width: 350px; }
         .range-tag { padding: 8px 12px; border-radius: 20px; border: 1px solid #bb86fc; color: #bb86fc; cursor: pointer; transition: 0.2s; font-size: 0.9rem; font-weight: bold; }
@@ -32,13 +32,16 @@
         .menu-btn { padding: 15px 30px; font-size: 1.2rem; font-weight: bold; margin: 8px; background-color: #1e1e1e; color: #e0e0e0; border: 2px solid #bb86fc; border-radius: 15px; cursor: pointer; width: 260px; transition: 0.2s; box-shadow: 0 4px 10px rgba(187, 134, 252, 0.2); }
         .menu-btn:hover { background-color: #bb86fc; color: #121212; }
         
-        /* 💡 단어 모드 버튼은 포인트를 줘서 구분! */
+        /* 단어 모드 버튼 디자인 */
         .menu-btn.word-mode { border-color: #03dac6; color: #03dac6; box-shadow: 0 4px 10px rgba(3, 218, 198, 0.2); }
         .menu-btn.word-mode:hover { background-color: #03dac6; color: #121212; }
 
-        .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; margin-bottom: 10px; }
-        /* 단어 퀴즈 보기도 글자가 길 수 있으니 폰트 조절 */
-        .option-btn { padding: 15px 10px; font-size: 1.2rem; font-weight: bold; border: 1px solid #333; border-radius: 15px; background-color: #2c2c2c; color: #ffffff; cursor: pointer; transition: all 0.2s ease; word-break: keep-all; }
+        /* 💡 생활 회화 모드 버튼 디자인 추가 (오렌지색 포인트) */
+        .menu-btn.sentence-mode { border-color: #ff9800; color: #ff9800; box-shadow: 0 4px 10px rgba(255, 152, 0, 0.2); }
+        .menu-btn.sentence-mode:hover { background-color: #ff9800; color: #121212; }
+
+        .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
+        .option-btn { padding: 15px 10px; font-size: 1.1rem; font-weight: bold; border: 1px solid #333; border-radius: 15px; background-color: #2c2c2c; color: #ffffff; cursor: pointer; transition: all 0.2s ease; word-break: keep-all; line-height: 1.3; }
         .option-btn:active { transform: scale(0.95); }
         .option-btn:disabled { cursor: not-allowed; opacity: 0.8; }
         .correct { background-color: #4CAF50 !important; color: white !important; border-color: #4CAF50 !important; }
@@ -53,14 +56,12 @@
 </head>
 <body>
 
-    <!-- 📌 [소제목 2] 🏠 메인 화면 -->
+    <!-- 🏠 메인 화면 -->
     <div id="mainScreen" class="screen active-screen">
         <header style="justify-content: center;">이즈의 일본어 튜터</header>
         <div class="center-container">
-            
             <div style="margin-bottom: 10px; color: #aaa; font-size: 0.9rem;">학습할 범위를 껐다 켤 수 있어!</div>
             <div class="range-grid">
-                <!-- 이즈 진도에 맞춰서 '나행'까지만 기본으로 켜두고 시작할게! -->
                 <div class="range-tag active" onclick="toggleRange('아행', this)">아행</div>
                 <div class="range-tag active" onclick="toggleRange('카행', this)">카행</div>
                 <div class="range-tag active" onclick="toggleRange('사행', this)">사행</div>
@@ -71,28 +72,29 @@
                 <div class="range-tag" onclick="toggleRange('야행', this)">야행</div>
                 <div class="range-tag" onclick="toggleRange('라행', this)">라행</div>
                 <div class="range-tag" onclick="toggleRange('와행', this)">와행(응)</div>
+                <!-- 💡 기초 회화용 태그 버튼 추가! -->
+                <div class="range-tag active" onclick="toggleRange('회화', this)">기초 인사</div>
             </div>
 
             <button class="menu-btn" onclick="startGame('hiragana')">あ 히라가나 낱글자</button>
             <button class="menu-btn" onclick="startGame('katakana')">ア 가타카나 낱글자</button>
-            <!-- 💡 추가됨: 단어 퀴즈 시작 버튼 -->
             <button class="menu-btn word-mode" onclick="startGame('word')">🍎 교재 속 단어 퀴즈</button>
+            <!-- 💡 대망의 생활 회화 퀴즈 버튼 추가! -->
+            <button class="menu-btn sentence-mode" onclick="startGame('sentence')">💬 생활 회화 퀴즈</button>
         </div>
     </div>
 
-    <!-- 📌 [소제목 3] 📝 퀴즈 화면 -->
+    <!-- 📝 퀴즈 화면 -->
     <div id="quizScreen" class="screen">
         <header>
             <button class="back-btn" onclick="goHome()">◀ 홈으로</button>
-            <span id="quizTitle">히라가나 퀴즈</span>
+            <span id="quizTitle">일본어 퀴즈</span>
             <span class="score-board" id="score">0 / 0</span>
         </header>
 
         <div class="center-container">
-            <!-- 💡 추가됨: 이 단어의 뜻은? 이라는 힌트를 보여줄 공간 -->
             <div id="meaningHint" class="meaning-hint"></div>
             <div class="japanese-char" id="questionText">あ</div>
-            <!-- 단어 모드일 때는 획순 보기가 필요 없어서 자바스크립트로 숨길 거야 -->
             <button id="hintBtn" onclick="showStrokeOrder()">획순 보기 ✍️</button>
         </div>
 
@@ -104,7 +106,7 @@
         </div>
     </div>
 
-    <!-- 📌 [소제목 4] 획순 보기 팝업창 -->
+    <!-- 획순 보기 팝업창 -->
     <div id="strokeModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeStrokeOrder()">&times;</span>
@@ -114,10 +116,10 @@
     </div>
 
 <!-- ================================================== -->
-<!-- 🧠 [2단원] 사진 속 90개 단어 데이터 및 통합 로직 (JavaScript) 🧠 -->
+<!-- 🧠 [2단원] 방대한 데이터 창고 (글자 + 단어 + 회화 문장) 🧠 -->
 <!-- ================================================== -->
     <script>
-        // 📌 [소제목 1] 히라가나 낱글자 데이터 (기존 유지)
+        // 📌 [소제목 1] 히라가나 낱글자 데이터
         const hiraganaData = [
             { question: 'あ', answer: '아', path: '히라가나/아행', options: ['아', '이', '우', '에'] },
             { question: 'い', answer: '이', path: '히라가나/아행', options: ['이', '카', '키', '사'] },
@@ -167,7 +169,7 @@
             { question: 'ん', answer: '응', path: '히라가나', options: ['응', '와', '음', '은'] }
         ];
 
-        // 📌 [소제목 2] 가타카나 낱글자 데이터 (기존 유지)
+        // 📌 [소제목 2] 가타카나 낱글자 데이터
         const katakanaData = [
             { question: 'ア', answer: '아', path: '가타카나/아행', options: ['아', '이', '우', '에'] },
             { question: 'イ', answer: '이', path: '가타카나/아행', options: ['이', '카', '키', '사'] },
@@ -188,7 +190,7 @@
             { question: 'チ', answer: '치', path: '가타카나/타행', options: ['치', '츠', '시', '니'] },
             { question: 'ツ', answer: '츠', path: '가타카나/타행', options: ['츠', '테', '스', '쿠'] },
             { question: 'テ', answer: '테', path: '가타카나/타행', options: ['테', '토', '세', '네'] },
-            { question: 'ト', answer: '토', path: '가타카나/타행', options: ['토', '타', '코', '소'] },
+            { question: 'ト', answer: '토', path: '가타카나/타행', options: ['ト', '타', '코', '소'] },
             { question: 'ナ', answer: '나', path: '가타카나/나행', options: ['나', '니', '마', '하'] },
             { question: 'ニ', answer: '니', path: '가타카나/나행', options: ['니', '누', '미', '히'] },
             { question: 'ヌ', answer: '누', path: '가타카나/나행', options: ['누', '네', '무', '후'] },
@@ -210,16 +212,15 @@
             { question: 'ラ', answer: '라', path: '가타카나/라행', options: ['라', '리', '다', '야'] },
             { question: 'リ', answer: '리', path: '가타카나/라행', options: ['리', '루', '이', '미'] },
             { question: 'ル', answer: '루', path: '가타카나/라행', options: ['루', '레', '우', '유'] },
-            { question: 'レ', answer: '레', path: '가타카나/라행', options: ['레', '로', '에', '메'] },
+            { question: 'レ', answer: '레', path: '가타카나/라행', options: ['레', '로', 'エ', '메'] },
             { question: 'ロ', answer: '로', path: '가타카나/라행', options: ['로', '라', '오', '요'] },
             { question: 'ワ', answer: '와', path: '가타카나/와행', options: ['와', '오', '아', '라'] },
             { question: 'ヲ', answer: '오(wo)', path: '가타카나/와행', options: ['오(wo)', '와', '우', '응'] },
             { question: 'ン', answer: '응', path: '가타카나', options: ['응', '와', '음', '은'] }
         ];
 
-        // 📌 [소제목 3] 💡 교재 사진 완벽 분석! 히라가나 & 가타카나 통합 단어 데이터
+        // 📌 [소제목 3] 교재 사진 통합 단어 데이터
         const wordData = [
-            // --- 히라가나 교재 단어 ---
             { question: 'あかちゃん', answer: '아기', row: '아행', options: ['아기', '사과', '연필', '왕'] },
             { question: 'いちご', answer: '딸기', row: '아행', options: ['딸기', '의자', '거북이', '다리미'] },
             { question: 'うさぎ', answer: '토끼', row: '아행', options: ['토끼', '바다', '고양이', '고기'] },
@@ -266,8 +267,6 @@
             { question: 'わし', answer: '독수리', row: '와행', options: ['독수리', '참새', '제비', '까마귀'] },
             { question: 'てをあらう', answer: '손을씻다', row: '와행', options: ['손을씻다', '세수하다', '목욕하다', '청소하다'] },
             { question: 'にんじん', answer: '당근', row: '와행', options: ['당근', '오이', '가지', '무'] },
-
-            // --- 가타카나 교재 단어 ---
             { question: 'アイロン', answer: '다리미', row: '아행', options: ['다리미', '세탁기', '청소기', '선풍기'] },
             { question: 'イルカ', answer: '돌고래', row: '아행', options: ['돌고래', '상어', '고래', '물고기'] },
             { question: 'オランウータン', answer: '오랑우탄', row: '아행', options: ['오랑우탄', '원숭이', '고릴라', '침팬지'] },
@@ -315,7 +314,24 @@
             { question: 'パンダ', answer: '판다', row: '와행', options: ['판다', '곰', '코알라', '토끼'] }
         ];
 
-        // 📌 [소제목 4] 게임 상태 및 범위 선택 변수
+        // 📌 [소제목 4] 💡 신규 추가! 생활 회화 및 문장 데이터
+        const sentenceData = [
+            { question: 'おはようございます', answer: '안녕하세요(아침)', row: '회화', options: ['안녕하세요(아침)', '감사합니다', '죄송합니다', '안녕히 계세요'] },
+            { question: 'こんにちは', answer: '안녕하세요(낮)', row: '회화', options: ['안녕하세요(낮)', '처음 뵙겠습니다', '잘 먹겠습니다', '네, 알겠습니다'] },
+            { question: 'こんばんは', answer: '안녕하세요(저녁)', row: '회화', options: ['안녕하세요(저녁)', '수고하셨습니다', '오랜만입니다', '부탁드립니다'] },
+            { question: 'ありがとうございます', answer: '감사합니다', row: '회화', options: ['감사합니다', '아니요, 괜찮습니다', '수고하셨습니다', '다녀오겠습니다'] },
+            { question: 'すみません', answer: '죄송합니다 / 저기요', row: '회화', options: ['죄송합니다 / 저기요', '맛있네요', '축하합니다', '조심하세요'] },
+            { question: 'いくらですか', answer: '얼마예요?', row: '회화', options: ['얼마예요?', '어디예요?', '누구예요?', '무엇인가요?'] },
+            { question: 'いただきます', answer: '잘 먹겠습니다', row: '회화', options: ['잘 먹겠습니다', '잘 먹었습니다', '다녀오겠습니다', '다녀왔습니다'] },
+            { question: 'ごちそうさまでした', answer: '잘 먹었습니다', row: '회화', options: ['잘 먹었습니다', '잘 먹겠습니다', '안녕하세요', '안녕히 주무세요'] },
+            { question: 'はい', answer: '네', row: '회화', options: ['네', '아니요', '아마도', '물론입니다'] },
+            { question: 'いいえ', answer: '아니요', row: '회화', options: ['아니요', '네', '알겠습니다', '모르겠습니다'] }
+        ];
+
+<!-- ================================================== -->
+<!-- 🧠 [3단원] 게임 진행 로직 (스마트 글자 크기 조절 완비) 🧠 -->
+<!-- ================================================== -->
+        // 📌 [소제목 5] 게임 상태 및 범위 선택 변수
         let currentMode = ''; 
         let currentModeData = []; 
         let quizData = []; 
@@ -323,14 +339,14 @@
         let score = 0;
         let isFirstTry = true; 
         
-        // 이즈의 진도를 고려해서 기본적으로 '나행'까지만 켜지게 설정!
-        let selectedRanges = ['아행', '카행', '사행', '타행', '나행'];
+        // 이즈의 진도와 💡새로 추가된 회화 모드를 켜둘게!
+        let selectedRanges = ['아행', '카행', '사행', '타행', '나행', '회화'];
 
-        // 📌 [소제목 5] 태그 클릭 시 범위 껐다 켜기 로직
+        // 📌 [소제목 6] 태그 클릭 시 범위 껐다 켜기 로직
         function toggleRange(rangeName, element) {
             if (selectedRanges.includes(rangeName)) {
                 if (selectedRanges.length === 1) {
-                    alert('최소 하나의 행은 선택하고 공부해야지!');
+                    alert('최소 하나의 범위는 선택하고 공부해야지!');
                     return;
                 }
                 selectedRanges = selectedRanges.filter(r => r !== rangeName);
@@ -341,7 +357,7 @@
             }
         }
 
-        // 📌 [소제목 6] 화면 전환 및 범위 필터링 로직
+        // 📌 [소제목 7] 화면 전환 및 데이터 필터링 (문장 모드 추가!)
         function startGame(mode) {
             currentMode = mode;
             document.getElementById('mainScreen').classList.remove('active-screen');
@@ -349,17 +365,19 @@
 
             let baseData = [];
             if (mode === 'hiragana') {
-                document.getElementById('quizTitle').innerText = '히라가나 퀴즈';
+                document.getElementById('quizTitle').innerText = '히라가나 낱글자';
                 baseData = hiraganaData;
             } else if (mode === 'katakana') {
-                document.getElementById('quizTitle').innerText = '가타카나 퀴즈';
+                document.getElementById('quizTitle').innerText = '가타카나 낱글자';
                 baseData = katakanaData;
             } else if (mode === 'word') {
                 document.getElementById('quizTitle').innerText = '단어 퀴즈';
                 baseData = wordData;
+            } else if (mode === 'sentence') { // 💡 회화 퀴즈 모드 로직 추가!
+                document.getElementById('quizTitle').innerText = '생활 회화 퀴즈';
+                baseData = sentenceData;
             }
 
-            // 선택한 범위(태그)에 맞는 문제만 추출
             currentModeData = baseData.filter(item => {
                 let itemRow = item.row || item.path.split('/')[1]; 
                 if (!itemRow && item.answer === '응') itemRow = '와행';
@@ -367,7 +385,7 @@
             });
 
             if (currentModeData.length === 0) {
-                alert('앗, 선택한 범위에 해당하는 문제가 없어! 범위를 더 넓혀봐.');
+                alert('앗, 선택한 범위에 해당하는 문제가 없어! 메인 화면에서 태그를 더 켜봐.');
                 goHome();
                 return;
             }
@@ -380,7 +398,6 @@
             document.getElementById('mainScreen').classList.add('active-screen');
         }
 
-        // 📌 [소제목 7] 섞기 및 퀴즈 초기화
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -396,38 +413,37 @@
             loadQuiz();
         }
 
-        // 📌 [소제목 8] 화면에 문제 세팅하기 (💡 글자 길이에 따른 폰트 자동 조절 추가!)
+        // 📌 [소제목 8] 화면에 문제 세팅하기 (💡 문장 길이에 맞춰 폰트 크기 완벽 자동 조절)
         function loadQuiz() {
             const currentQuiz = quizData[currentQuizIndex];
             isFirstTry = true; 
             
-            // 힌트 표시 및 획순 버튼 숨김 제어
-            if (currentMode === 'word') {
-                document.getElementById('meaningHint').innerText = "이 단어의 뜻은?";
+            // 단어나 문장 모드일 때는 뜻 힌트를 띄우고 획순 보기를 숨김!
+            if (currentMode === 'word' || currentMode === 'sentence') {
+                document.getElementById('meaningHint').innerText = currentMode === 'sentence' ? "이 문장의 뜻은?" : "이 단어의 뜻은?";
                 document.getElementById('hintBtn').style.display = 'none';
             } else {
                 document.getElementById('meaningHint').innerText = "";
                 document.getElementById('hintBtn').style.display = 'inline-block';
             }
 
-            // 문제 글자 띄우기
             const questionEl = document.getElementById('questionText');
             questionEl.innerText = currentQuiz.question;
             
-            // 💡 여기가 문제를 해결해 줄 핵심 마법의 코드!
-            // 문제의 글자 수(length)를 세어서 폰트 크기를 유동적으로 바꿔줘!
+            // 💡 마법의 폰트 크기 조절 로직 (회화 문장까지 커버)
             const textLen = currentQuiz.question.length;
             if (textLen === 1) {
-                questionEl.style.fontSize = '6rem';       // 낱글자는 아주 큼직하게!
+                questionEl.style.fontSize = '6rem';       // 낱글자 (예: あ)
             } else if (textLen <= 3) {
-                questionEl.style.fontSize = '4.5rem';     // 2~3글자 단어 (예: りんご)
+                questionEl.style.fontSize = '4.5rem';     // 짧은 단어 (예: りんご)
             } else if (textLen <= 5) {
-                questionEl.style.fontSize = '3rem';       // 4~5글자 단어 (예: ソーセージ)
+                questionEl.style.fontSize = '3rem';       // 중간 단어 (예: ソーセージ)
+            } else if (textLen <= 7) {
+                questionEl.style.fontSize = '2.2rem';     // 긴 단어/짧은 문장
             } else {
-                questionEl.style.fontSize = '2.2rem';     // 6글자 이상 긴 단어 (예: オランウータン)
+                questionEl.style.fontSize = '1.8rem';     // 8글자 이상 아주 긴 문장 (예: おはようございます)
             }
             
-            // 보기 4개 섞어서 버튼에 넣기
             let shuffledOptions = [...currentQuiz.options];
             shuffleArray(shuffledOptions);
 
@@ -465,7 +481,7 @@
                         loadQuiz();
                     } else {
                         document.getElementById('score').innerText = `${score} / ${quizData.length}`;
-                        alert(`선택한 범위의 복습이 끝났어! 총 ${quizData.length}문제 중 ${score}문제를 맞췄네. 메인으로 돌아갈게!`);
+                        alert(`퀴즈 끝! 총 ${quizData.length}문제 중 ${score}문제를 맞췄네. 메인으로 돌아갈게!`);
                         goHome(); 
                     }
                 }, 800);

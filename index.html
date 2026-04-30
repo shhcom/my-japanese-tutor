@@ -1,0 +1,383 @@
+<!-- ================================================== -->
+<!-- 🏆 [1단원] 앱의 뼈대와 범위 선택 기능 (HTML & CSS) 🏆 -->
+<!-- ================================================== -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>이즈의 일본어 튜터</title>
+    
+    <!-- 📌 [소제목 1] 앱 디자인 스타일 (CSS) -->
+    <style>
+        body {
+            margin: 0; padding: 0; background-color: #121212; color: #e0e0e0;
+            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+            height: 100vh; overflow: hidden; 
+        }
+
+        .screen { display: none; flex-direction: column; height: 100vh; }
+        .active-screen { display: flex; } 
+
+        header {
+            text-align: center; padding: 20px; font-size: 1.2rem; font-weight: bold;
+            background-color: #1e1e1e; box-shadow: 0 2px 10px rgba(0,0,0,0.5); color: #ffffff;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .score-board { font-size: 1rem; color: #bb86fc; }
+
+        .back-btn {
+            background: none; border: none; color: #aaa; font-size: 1rem;
+            font-weight: bold; cursor: pointer; padding: 0;
+        }
+        .back-btn:hover { color: #fff; }
+        
+        .center-container { flex: 1; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+        
+        /* 💡 추가됨: 학습 범위 선택 태그 디자인 */
+        .range-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 30px; max-width: 350px; }
+        .range-tag {
+            padding: 8px 15px; border-radius: 20px; border: 1px solid #bb86fc;
+            color: #bb86fc; cursor: pointer; transition: 0.2s; font-size: 0.95rem; font-weight: bold;
+        }
+        .range-tag.active { background-color: #bb86fc; color: #121212; }
+
+        .menu-btn {
+            padding: 15px 30px; font-size: 1.3rem; font-weight: bold; margin: 10px;
+            background-color: #1e1e1e; color: #e0e0e0; border: 2px solid #bb86fc;
+            border-radius: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(187, 134, 252, 0.2);
+        }
+        .menu-btn:hover { background-color: #bb86fc; color: #121212; }
+
+        .japanese-char {
+            font-size: 8rem; font-weight: bold; color: #ffffff;
+            text-shadow: 0 4px 15px rgba(255, 255, 255, 0.15); margin-bottom: 20px;
+        }
+
+        #hintBtn {
+            padding: 10px 20px; font-size: 1rem; font-weight: bold; background-color: #333; color: #bb86fc;
+            border: 1px solid #bb86fc; border-radius: 20px; cursor: pointer; transition: 0.2s; margin-bottom: 20px;
+        }
+        #hintBtn:hover { background-color: #bb86fc; color: #121212; }
+        .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; margin-bottom: 20px; }
+        .option-btn {
+            padding: 20px; font-size: 1.5rem; font-weight: bold; border: 1px solid #333; border-radius: 15px;
+            background-color: #2c2c2c; color: #ffffff; box-shadow: 0 4px 6px rgba(0,0,0,0.3); cursor: pointer; transition: all 0.2s ease;
+        }
+        .option-btn:active { transform: scale(0.95); }
+        .option-btn:disabled { cursor: not-allowed; opacity: 0.8; }
+        .correct { background-color: #4CAF50 !important; color: white !important; border-color: #4CAF50 !important; }
+        .wrong { background-color: #F44336 !important; color: white !important; border-color: #F44336 !important; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background-color: #1e1e1e; padding: 30px; border-radius: 15px; text-align: center; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.5); border: 1px solid #333; }
+        .modal-title { font-size: 1.2rem; margin-bottom: 15px; font-weight: bold; color: #fff; }
+        .close-btn { position: absolute; top: 10px; right: 15px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .close-btn:hover { color: #fff; }
+    </style>
+</head>
+<body>
+
+    <!-- 📌 [소제목 2] 🏠 메인 화면 (학습 범위 선택 추가!) -->
+    <div id="mainScreen" class="screen active-screen">
+        <header style="justify-content: center;">이즈의 일본어 튜터</header>
+        <div class="center-container">
+            
+            <!-- 💡 추가됨: 내가 원하는 행만 고르는 태그 버튼들 -->
+            <div style="margin-bottom: 15px; color: #aaa; font-size: 0.9rem;">학습할 범위를 껐다 켤 수 있어!</div>
+            <div class="range-grid">
+                <div class="range-tag active" onclick="toggleRange('아행', this)">아행</div>
+                <div class="range-tag active" onclick="toggleRange('카행', this)">카행</div>
+                <div class="range-tag active" onclick="toggleRange('사행', this)">사행</div>
+                <div class="range-tag active" onclick="toggleRange('타행', this)">타행</div>
+                <div class="range-tag active" onclick="toggleRange('나행', this)">나행</div>
+                <div class="range-tag active" onclick="toggleRange('하행', this)">하행</div>
+                <div class="range-tag active" onclick="toggleRange('마행', this)">마행</div>
+                <div class="range-tag active" onclick="toggleRange('야행', this)">야행</div>
+                <div class="range-tag active" onclick="toggleRange('라행', this)">라행</div>
+                <div class="range-tag active" onclick="toggleRange('와행', this)">와행(응)</div>
+            </div>
+
+            <button class="menu-btn" onclick="startGame('hiragana')">あ 히라가나 시작</button>
+            <button class="menu-btn" onclick="startGame('katakana')">ア 가타카나 시작</button>
+        </div>
+    </div>
+
+    <!-- 📌 [소제목 3] 📝 퀴즈 화면 -->
+    <div id="quizScreen" class="screen">
+        <header>
+            <button class="back-btn" onclick="goHome()">◀ 홈으로</button>
+            <span id="quizTitle">히라가나 퀴즈</span>
+            <span class="score-board" id="score">0 / 0</span>
+        </header>
+
+        <div class="center-container">
+            <div class="japanese-char" id="questionText">あ</div>
+            <button id="hintBtn" onclick="showStrokeOrder()">획순 보기 ✍️</button>
+        </div>
+
+        <div class="button-grid">
+            <button class="option-btn" onclick="checkAnswer(0)" id="btn0">아</button>
+            <button class="option-btn" onclick="checkAnswer(1)" id="btn1">이</button>
+            <button class="option-btn" onclick="checkAnswer(2)" id="btn2">우</button>
+            <button class="option-btn" onclick="checkAnswer(3)" id="btn3">에</button>
+        </div>
+    </div>
+
+    <!-- 📌 [소제목 4] 획순 보기 팝업창 -->
+    <div id="strokeModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeStrokeOrder()">&times;</span>
+            <div class="modal-title" id="modalTitle">쓰는 순서</div>
+            <img id="strokeImage" src="" alt="획순 이미지" style="width: 150px; height: 150px; background-color: white; border-radius: 10px;">
+        </div>
+    </div>
+
+<!-- ================================================== -->
+<!-- 🧠 [2단원] 선택한 범위만 출제하는 로직 (JavaScript) 🧠 -->
+<!-- ================================================== -->
+    <script>
+        // 📌 [소제목 1] 히라가나 & 가타카나 데이터 창고 (기존과 동일)
+        const hiraganaData = [
+            { question: 'あ', answer: '아', path: '히라가나/아행', options: ['아', '이', '우', '에'] },
+            { question: 'い', answer: '이', path: '히라가나/아행', options: ['이', '카', '키', '사'] },
+            { question: 'う', answer: '우', path: '히라가나/아행', options: ['우', '아', '쿠', '치'] },
+            { question: 'え', answer: '에', path: '히라가나/아행', options: ['에', '오', '케', '테'] },
+            { question: 'お', answer: '오', path: '히라가나/아행', options: ['오', '아', '코', '소'] },
+            { question: 'か', answer: '카', path: '히라가나/카행', options: ['카', '키', '아', '타'] },
+            { question: 'き', answer: '키', path: '히라가나/카행', options: ['키', '쿠', '시', '니'] },
+            { question: 'く', answer: '쿠', path: '히라가나/카행', options: ['쿠', '케', '스', '츠'] },
+            { question: 'け', answer: '케', path: '히라가나/카행', options: ['케', '코', '세', '테'] },
+            { question: 'こ', answer: '코', path: '히라가나/카행', options: ['코', '카', '소', '토'] },
+            { question: 'さ', answer: '사', path: '히라가나/사행', options: ['사', '시', '아', '카'] },
+            { question: 'し', answer: '시', path: '히라가나/사행', options: ['시', '스', '치', '키'] },
+            { question: 'す', answer: '스', path: '히라가나/사행', options: ['스', '세', '츠', '쿠'] },
+            { question: 'せ', answer: '세', path: '히라가나/사행', options: ['세', '소', '테', '네'] },
+            { question: 'そ', answer: '소', path: '히라가나/사행', options: ['소', '사', '토', '노'] },
+            { question: 'た', answer: '타', path: '히라가나/타행', options: ['타', '치', '카', '사'] },
+            { question: 'ち', answer: '치', path: '히라가나/타행', options: ['치', '츠', '시', '니'] },
+            { question: 'つ', answer: '츠', path: '히라가나/타행', options: ['츠', '테', '스', '쿠'] },
+            { question: 'て', answer: '테', path: '히라가나/타행', options: ['테', '토', '세', '네'] },
+            { question: 'と', answer: '토', path: '히라가나/타행', options: ['토', '타', '코', '소'] },
+            { question: 'な', answer: '나', path: '히라가나/나행', options: ['나', '니', '마', '하'] },
+            { question: 'に', answer: '니', path: '히라가나/나행', options: ['니', '누', '미', '히'] },
+            { question: 'ぬ', answer: '누', path: '히라가나/나행', options: ['누', '네', '무', '후'] },
+            { question: 'ね', answer: '네', path: '히라가나/나행', options: ['네', '노', '메', '헤'] },
+            { question: 'の', answer: '노', path: '히라가나/나행', options: ['노', '나', '모', '호'] },
+            { question: 'は', answer: '하', path: '히라가나/하행', options: ['하', '히', '마', '나'] },
+            { question: 'ひ', answer: '히', path: '히라가나/하행', options: ['히', '후', '미', '니'] },
+            { question: 'ふ', answer: '후', path: '히라가나/하행', options: ['후', '헤', '무', '누'] },
+            { question: 'へ', answer: '헤', path: '히라가나/하행', options: ['헤', '호', '메', '네'] },
+            { question: 'ほ', answer: '호', path: '히라가나/하행', options: ['호', '하', '모', '노'] },
+            { question: 'ま', answer: '마', path: '히라가나/마행', options: ['마', '미', '나', '하'] },
+            { question: 'み', answer: '미', path: '히라가나/마행', options: ['미', '무', '니', '히'] },
+            { question: 'む', answer: '무', path: '히라가나/마행', options: ['무', '메', '누', '후'] },
+            { question: 'め', answer: '메', path: '히라가나/마행', options: ['메', '모', '네', '헤'] },
+            { question: 'も', answer: '모', path: '히라가나/마행', options: ['모', '마', '노', '호'] },
+            { question: 'や', answer: '야', path: '히라가나/야행', options: ['야', '유', '아', '라'] },
+            { question: 'ゆ', answer: '유', path: '히라가나/야행', options: ['유', '요', '우', '루'] },
+            { question: 'よ', answer: '요', path: '히라가나/야행', options: ['요', '야', '오', '로'] },
+            { question: 'ら', answer: '라', path: '히라가나/라행', options: ['라', '리', '다', '야'] },
+            { question: 'り', answer: '리', path: '히라가나/라행', options: ['리', '루', '이', '미'] },
+            { question: 'る', answer: '루', path: '히라가나/라행', options: ['루', '레', '우', '유'] },
+            { question: 'れ', answer: '레', path: '히라가나/라행', options: ['레', '로', '에', '메'] },
+            { question: 'ろ', answer: '로', path: '히라가나/라행', options: ['로', '라', '오', '요'] },
+            { question: 'わ', answer: '와', path: '히라가나/와행', options: ['와', '오', '아', '라'] },
+            { question: 'を', answer: '오(wo)', path: '히라가나/와행', options: ['오(wo)', '와', '우', '응'] },
+            { question: 'ん', answer: '응', path: '히라가나', options: ['응', '와', '음', '은'] }
+        ];
+
+        const katakanaData = [
+            { question: 'ア', answer: '아', path: '가타카나/아행', options: ['아', '이', '우', '에'] },
+            { question: 'イ', answer: '이', path: '가타카나/아행', options: ['이', '카', '키', '사'] },
+            { question: 'ウ', answer: '우', path: '가타카나/아행', options: ['우', '아', '쿠', '치'] },
+            { question: 'エ', answer: '에', path: '가타카나/아행', options: ['에', '오', '케', '테'] },
+            { question: 'オ', answer: '오', path: '가타카나/아행', options: ['오', '아', '코', '소'] },
+            { question: 'カ', answer: '카', path: '가타카나/카행', options: ['카', '키', '아', '타'] },
+            { question: 'キ', answer: '키', path: '가타카나/카행', options: ['키', '쿠', '시', '니'] },
+            { question: 'ク', answer: '쿠', path: '가타카나/카행', options: ['쿠', '케', '스', '츠'] },
+            { question: 'ケ', answer: '케', path: '가타카나/카행', options: ['케', '코', '세', '테'] },
+            { question: 'コ', answer: '코', path: '가타카나/카행', options: ['코', '카', '소', '토'] },
+            { question: 'サ', answer: '사', path: '가타카나/사행', options: ['사', '시', '아', '카'] },
+            { question: 'シ', answer: '시', path: '가타카나/사행', options: ['시', '스', '치', '키'] },
+            { question: 'ス', answer: '스', path: '가타카나/사행', options: ['스', '세', '츠', '쿠'] },
+            { question: 'セ', answer: '세', path: '가타카나/사행', options: ['세', '소', '테', '네'] },
+            { question: 'ソ', answer: '소', path: '가타카나/사행', options: ['소', '사', '토', '노'] },
+            { question: 'タ', answer: '타', path: '가타카나/타행', options: ['타', '치', '카', '사'] },
+            { question: 'チ', answer: '치', path: '가타카나/타행', options: ['치', '츠', '시', '니'] },
+            { question: 'ツ', answer: '츠', path: '가타카나/타행', options: ['츠', '테', '스', '쿠'] },
+            { question: 'テ', answer: '테', path: '가타카나/타행', options: ['테', '토', '세', '네'] },
+            { question: 'ト', answer: '토', path: '가타카나/타행', options: ['토', '타', '코', '소'] },
+            { question: 'ナ', answer: '나', path: '가타카나/나행', options: ['나', '니', '마', '하'] },
+            { question: 'ニ', answer: '니', path: '가타카나/나행', options: ['니', '누', '미', '히'] },
+            { question: 'ヌ', answer: '누', path: '가타카나/나행', options: ['누', '네', '무', '후'] },
+            { question: 'ネ', answer: '네', path: '가타카나/나행', options: ['네', '노', '메', '헤'] },
+            { question: 'ノ', answer: '노', path: '가타카나/나행', options: ['노', '나', '모', '호'] },
+            { question: 'ハ', answer: '하', path: '가타카나/하행', options: ['하', '히', '마', '나'] },
+            { question: 'ヒ', answer: '히', path: '가타카나/하행', options: ['히', '후', '미', '니'] },
+            { question: 'フ', answer: '후', path: '가타카나/하행', options: ['후', '헤', '무', '누'] },
+            { question: 'ヘ', answer: '헤', path: '가타카나/하행', options: ['헤', '호', '메', '네'] },
+            { question: 'ホ', answer: '호', path: '가타카나/하행', options: ['호', '하', '모', '노'] },
+            { question: 'マ', answer: '마', path: '가타카나/마행', options: ['마', '미', '나', '하'] },
+            { question: 'ミ', answer: '미', path: '가타카나/마행', options: ['미', '무', '니', '히'] },
+            { question: 'ム', answer: '무', path: '가타카나/마행', options: ['무', '메', '누', '후'] },
+            { question: 'メ', answer: '메', path: '가타카나/마행', options: ['メ', '모', '네', '헤'] },
+            { question: 'モ', answer: '모', path: '가타카나/마행', options: ['모', '마', '노', '호'] },
+            { question: 'ヤ', answer: '야', path: '가타카나/야행', options: ['야', '유', '아', '라'] },
+            { question: 'ユ', answer: '유', path: '가타카나/야행', options: ['유', '요', '우', '루'] },
+            { question: 'ヨ', answer: '요', path: '가타카나/야행', options: ['요', '야', '오', '로'] },
+            { question: 'ラ', answer: '라', path: '가타카나/라행', options: ['라', '리', '다', '야'] },
+            { question: 'リ', answer: '리', path: '가타카나/라행', options: ['리', '루', '이', '미'] },
+            { question: 'ル', answer: '루', path: '가타카나/라행', options: ['루', '레', '우', '유'] },
+            { question: 'レ', answer: '레', path: '가타카나/라행', options: ['레', '로', '에', '메'] },
+            { question: 'ロ', answer: '로', path: '가타카나/라행', options: ['로', '라', '오', '요'] },
+            { question: 'ワ', answer: '와', path: '가타카나/와행', options: ['와', '오', '아', '라'] },
+            { question: 'ヲ', answer: '오(wo)', path: '가타카나/와행', options: ['오(wo)', '와', '우', '응'] },
+            { question: 'ン', answer: '응', path: '가타카나', options: ['응', '와', '음', '은'] }
+        ];
+
+        // 📌 [소제목 2] 게임 상태 및 💡범위 선택 변수
+        let currentModeData = []; 
+        let quizData = []; 
+        let currentQuizIndex = 0;
+        let score = 0;
+        let isFirstTry = true; 
+        
+        // 기본적으로 모든 행이 선택된 상태로 시작!
+        let selectedRanges = ['아행', '카행', '사행', '타행', '나행', '하행', '마행', '야행', '라행', '와행'];
+
+        // 📌 [소제목 3] 태그 클릭 시 범위 껐다 켜기 로직
+        function toggleRange(rangeName, element) {
+            if (selectedRanges.includes(rangeName)) {
+                // 이미 선택된 걸 끄려고 할 때, 마지막 1개는 못 끄게 막기!
+                if (selectedRanges.length === 1) {
+                    alert('최소 하나의 행은 선택하고 공부해야지!');
+                    return;
+                }
+                selectedRanges = selectedRanges.filter(r => r !== rangeName);
+                element.classList.remove('active');
+            } else {
+                // 꺼진 걸 다시 켤 때
+                selectedRanges.push(rangeName);
+                element.classList.add('active');
+            }
+        }
+
+        // 📌 [소제목 4] 화면 전환 및 💡선택한 범위만 추출하는 로직
+        function startGame(mode) {
+            document.getElementById('mainScreen').classList.remove('active-screen');
+            document.getElementById('quizScreen').classList.add('active-screen');
+
+            let baseData = [];
+            if (mode === 'hiragana') {
+                document.getElementById('quizTitle').innerText = '히라가나 퀴즈';
+                baseData = hiraganaData;
+            } else if (mode === 'katakana') {
+                document.getElementById('quizTitle').innerText = '가타카나 퀴즈';
+                baseData = katakanaData;
+            }
+
+            // 💡 이즈가 선택한 태그(행)에 해당하는 문제만 쏙쏙 걸러내기!
+            currentModeData = baseData.filter(item => {
+                let itemRow = item.path.split('/')[1]; // 폴더 경로에서 '아행' 추출
+                if (!itemRow && item.answer === '응') itemRow = '와행'; // 경로가 없는 '응'은 와행으로 묶기
+                return selectedRanges.includes(itemRow);
+            });
+
+            initGame();
+        }
+
+        // '홈으로' 버튼 눌렀을 때
+        function goHome() {
+            document.getElementById('quizScreen').classList.remove('active-screen');
+            document.getElementById('mainScreen').classList.add('active-screen');
+        }
+
+        // 📌 [소제목 5] 무작위 섞기 기능
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // 📌 [소제목 6] 게임 초기화 및 시작
+        function initGame() {
+            quizData = [...currentModeData]; 
+            shuffleArray(quizData); 
+            currentQuizIndex = 0;
+            score = 0;
+            loadQuiz();
+        }
+
+        // 📌 [소제목 7] 화면에 문제 세팅하기
+        function loadQuiz() {
+            const currentQuiz = quizData[currentQuizIndex];
+            isFirstTry = true; 
+            
+            document.getElementById('questionText').innerText = currentQuiz.question;
+            
+            let shuffledOptions = [...currentQuiz.options];
+            shuffleArray(shuffledOptions);
+
+            for (let i = 0; i < 4; i++) {
+                const btn = document.getElementById('btn' + i);
+                btn.innerText = shuffledOptions[i]; 
+                btn.dataset.originalText = shuffledOptions[i]; 
+                btn.classList.remove('correct', 'wrong');
+                btn.disabled = false;
+                btn.style.opacity = '1';
+            }
+            
+            document.getElementById('score').innerText = `${score} / ${quizData.length}`; // 문제 수도 선택한 만큼 줄어듦!
+        }
+
+        // 📌 [소제목 8] 정답 채점 로직
+        function checkAnswer(selectedIndex) {
+            const currentQuiz = quizData[currentQuizIndex];
+            const selectedBtn = document.getElementById('btn' + selectedIndex);
+            const selectedText = selectedBtn.dataset.originalText; 
+
+            if (selectedText === currentQuiz.answer) {
+                selectedBtn.classList.add('correct');
+                if (isFirstTry) score++; 
+
+                for (let i = 0; i < 4; i++) {
+                    document.getElementById('btn' + i).disabled = true; 
+                }
+
+                document.getElementById('score').innerText = `${score} / ${quizData.length}`;
+
+                setTimeout(() => {
+                    currentQuizIndex++;
+                    if (currentQuizIndex < quizData.length) {
+                        loadQuiz();
+                    } else {
+                        document.getElementById('score').innerText = `${score} / ${quizData.length}`;
+                        alert(`선택한 범위의 복습이 끝났어! 총 ${quizData.length}문제 중 ${score}문제를 맞췄네. 메인으로 돌아갈게!`);
+                        goHome(); 
+                    }
+                }, 800);
+
+            } else {
+                selectedBtn.classList.add('wrong');
+                selectedBtn.disabled = true; 
+                isFirstTry = false; 
+            }
+        }
+
+        // 📌 [소제목 9] 획순 보기 팝업 제어
+        function showStrokeOrder() {
+            const currentQuiz = quizData[currentQuizIndex];
+            document.getElementById('modalTitle').innerText = `${currentQuiz.question} 쓰는 순서`;
+            document.getElementById('strokeImage').src = `${currentQuiz.path}/${currentQuiz.question}.gif`;
+            document.getElementById('strokeModal').style.display = 'flex';
+        }
+
+        function closeStrokeOrder() {
+            document.getElementById('strokeModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
+

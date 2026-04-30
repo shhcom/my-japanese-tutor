@@ -1,5 +1,5 @@
 <!-- ================================================== -->
-<!-- 🏆 [1단원] 문장 및 회화 모드 추가 화면 구성 (HTML & CSS) 🏆 -->
+<!-- 🏆 [1단원] 발음 듣기 & 반대 퀴즈 UI 추가 (HTML & CSS) 🏆 -->
 <!-- ================================================== -->
 <!DOCTYPE html>
 <html lang="ko">
@@ -19,25 +19,27 @@
         
         .center-container { flex: 1; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; width: 100%; box-sizing: border-box; }
         
-        /* 힌트 텍스트 */
+        /* 💡 퀴즈 방향 선택 스위치 스타일 */
+        .direction-toggle-container { display: flex; background-color: #1e1e1e; border-radius: 10px; margin-bottom: 25px; border: 1px solid #333; overflow: hidden; }
+        .direction-btn { padding: 10px 15px; font-size: 0.95rem; font-weight: bold; border: none; background: none; color: #aaa; cursor: pointer; transition: 0.3s; }
+        .direction-btn.active { background-color: #bb86fc; color: #121212; }
+
         .meaning-hint { font-size: 1.2rem; color: #bb86fc; margin-bottom: 10px; font-weight: bold; text-align: center; }
-        
-        /* 💡 문장이 길어질 것을 대비해 줄바꿈(line-height, width) 속성을 추가했어! */
-        .japanese-char { font-weight: bold; color: #ffffff; text-shadow: 0 4px 15px rgba(255, 255, 255, 0.15); margin-bottom: 20px; text-align: center; word-break: keep-all; line-height: 1.2; width: 100%; }
+        .japanese-char { font-weight: bold; color: #ffffff; text-shadow: 0 4px 15px rgba(255, 255, 255, 0.15); margin-bottom: 15px; text-align: center; word-break: keep-all; line-height: 1.2; width: 100%; }
+
+        /* 💡 발음 듣기(TTS) 버튼 스타일 */
+        .tts-btn { padding: 10px 20px; font-size: 1.2rem; background-color: #333; color: #03dac6; border: 1px solid #03dac6; border-radius: 20px; cursor: pointer; transition: 0.2s; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; font-weight: bold; }
+        .tts-btn:hover { background-color: #03dac6; color: #121212; }
 
         .range-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 25px; max-width: 350px; }
         .range-tag { padding: 8px 12px; border-radius: 20px; border: 1px solid #bb86fc; color: #bb86fc; cursor: pointer; transition: 0.2s; font-size: 0.9rem; font-weight: bold; }
         .range-tag.active { background-color: #bb86fc; color: #121212; }
 
-        .menu-btn { padding: 15px 30px; font-size: 1.2rem; font-weight: bold; margin: 8px; background-color: #1e1e1e; color: #e0e0e0; border: 2px solid #bb86fc; border-radius: 15px; cursor: pointer; width: 260px; transition: 0.2s; box-shadow: 0 4px 10px rgba(187, 134, 252, 0.2); }
+        .menu-btn { padding: 15px 30px; font-size: 1.2rem; font-weight: bold; margin: 8px; background-color: #1e1e1e; color: #e0e0e0; border: 2px solid #bb86fc; border-radius: 15px; cursor: pointer; width: 260px; transition: 0.2s; }
         .menu-btn:hover { background-color: #bb86fc; color: #121212; }
-        
-        /* 단어 모드 버튼 디자인 */
-        .menu-btn.word-mode { border-color: #03dac6; color: #03dac6; box-shadow: 0 4px 10px rgba(3, 218, 198, 0.2); }
+        .menu-btn.word-mode { border-color: #03dac6; color: #03dac6; }
         .menu-btn.word-mode:hover { background-color: #03dac6; color: #121212; }
-
-        /* 💡 생활 회화 모드 버튼 디자인 추가 (오렌지색 포인트) */
-        .menu-btn.sentence-mode { border-color: #ff9800; color: #ff9800; box-shadow: 0 4px 10px rgba(255, 152, 0, 0.2); }
+        .menu-btn.sentence-mode { border-color: #ff9800; color: #ff9800; }
         .menu-btn.sentence-mode:hover { background-color: #ff9800; color: #121212; }
 
         .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
@@ -51,7 +53,6 @@
         .modal-content { background-color: #1e1e1e; padding: 30px; border-radius: 15px; text-align: center; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.5); border: 1px solid #333; }
         .modal-title { font-size: 1.2rem; margin-bottom: 15px; font-weight: bold; color: #fff; }
         .close-btn { position: absolute; top: 10px; right: 15px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
-        .close-btn:hover { color: #fff; }
     </style>
 </head>
 <body>
@@ -60,6 +61,14 @@
     <div id="mainScreen" class="screen active-screen">
         <header style="justify-content: center;">이즈의 일본어 튜터</header>
         <div class="center-container">
+            
+            <!-- 💡 방향 설정 버튼 추가 -->
+            <div style="margin-bottom: 8px; color: #aaa; font-size: 0.9rem;">퀴즈 출제 방식</div>
+            <div class="direction-toggle-container">
+                <button id="dirJpToKr" class="direction-btn active" onclick="setDirection('jp_to_kr')">🇯🇵 일 ➔ 🇰🇷 한</button>
+                <button id="dirKrToJp" class="direction-btn" onclick="setDirection('kr_to_jp')">🇰🇷 한 ➔ 🇯🇵 일</button>
+            </div>
+
             <div style="margin-bottom: 10px; color: #aaa; font-size: 0.9rem;">학습할 범위를 껐다 켤 수 있어!</div>
             <div class="range-grid">
                 <div class="range-tag active" onclick="toggleRange('아행', this)">아행</div>
@@ -72,14 +81,12 @@
                 <div class="range-tag" onclick="toggleRange('야행', this)">야행</div>
                 <div class="range-tag" onclick="toggleRange('라행', this)">라행</div>
                 <div class="range-tag" onclick="toggleRange('와행', this)">와행(응)</div>
-                <!-- 💡 기초 회화용 태그 버튼 추가! -->
                 <div class="range-tag active" onclick="toggleRange('회화', this)">기초 인사</div>
             </div>
 
             <button class="menu-btn" onclick="startGame('hiragana')">あ 히라가나 낱글자</button>
             <button class="menu-btn" onclick="startGame('katakana')">ア 가타카나 낱글자</button>
             <button class="menu-btn word-mode" onclick="startGame('word')">🍎 교재 속 단어 퀴즈</button>
-            <!-- 💡 대망의 생활 회화 퀴즈 버튼 추가! -->
             <button class="menu-btn sentence-mode" onclick="startGame('sentence')">💬 생활 회화 퀴즈</button>
         </div>
     </div>
@@ -95,14 +102,18 @@
         <div class="center-container">
             <div id="meaningHint" class="meaning-hint"></div>
             <div class="japanese-char" id="questionText">あ</div>
-            <button id="hintBtn" onclick="showStrokeOrder()">획순 보기 ✍️</button>
+            
+            <!-- 💡 발음 듣기 버튼 추가 (클릭 시 playTTS 함수 실행) -->
+            <button id="ttsBtn" class="tts-btn" onclick="playTTS()">🔊 발음 듣기</button>
+            
+            <button id="hintBtn" onclick="showStrokeOrder()" style="padding: 10px 20px; background-color: #333; color: #bb86fc; border: 1px solid #bb86fc; border-radius: 20px; cursor: pointer;">획순 보기 ✍️</button>
         </div>
 
         <div class="button-grid">
-            <button class="option-btn" onclick="checkAnswer(0)" id="btn0">아</button>
-            <button class="option-btn" onclick="checkAnswer(1)" id="btn1">이</button>
-            <button class="option-btn" onclick="checkAnswer(2)" id="btn2">우</button>
-            <button class="option-btn" onclick="checkAnswer(3)" id="btn3">에</button>
+            <button class="option-btn" onclick="checkAnswer(0)" id="btn0"></button>
+            <button class="option-btn" onclick="checkAnswer(1)" id="btn1"></button>
+            <button class="option-btn" onclick="checkAnswer(2)" id="btn2"></button>
+            <button class="option-btn" onclick="checkAnswer(3)" id="btn3"></button>
         </div>
     </div>
 
@@ -204,19 +215,19 @@
             { question: 'マ', answer: '마', path: '가타카나/마행', options: ['마', '미', '나', '하'] },
             { question: 'ミ', answer: '미', path: '가타카나/마행', options: ['미', '무', '니', '히'] },
             { question: 'ム', answer: '무', path: '가타카나/마행', options: ['무', '메', '누', '후'] },
-            { question: 'メ', answer: '메', path: '가타카나/마행', options: ['메', '모', '네', '헤'] },
-            { question: 'モ', answer: '모', path: '가타카나/마행', options: ['모', '마', '노', '호'] },
+            { question: 'メ', answer: '메', path: '가타카나/마행', options: ['メ', '모', '네', '헤'] },
+            { question: 'モ', answer: '모', path: '가타카나/마행', options: ['モ', '마', '노', '호'] },
             { question: 'ヤ', answer: '야', path: '가타카나/야행', options: ['야', '유', '아', '라'] },
             { question: 'ユ', answer: '유', path: '가타카나/야행', options: ['유', '요', '우', '루'] },
             { question: 'ヨ', answer: '요', path: '가타카나/야행', options: ['요', '야', '오', '로'] },
             { question: 'ラ', answer: '라', path: '가타카나/라행', options: ['라', '리', '다', '야'] },
-            { question: 'リ', answer: '리', path: '가타카나/라행', options: ['리', '루', '이', '미'] },
-            { question: 'ル', answer: '루', path: '가타카나/라행', options: ['루', '레', '우', '유'] },
-            { question: 'レ', answer: '레', path: '가타카나/라행', options: ['레', '로', 'エ', '메'] },
-            { question: 'ロ', answer: '로', path: '가타카나/라행', options: ['로', '라', '오', '요'] },
-            { question: 'ワ', answer: '와', path: '가타카나/와행', options: ['와', '오', '아', '라'] },
-            { question: 'ヲ', answer: '오(wo)', path: '가타카나/와행', options: ['오(wo)', '와', '우', '응'] },
-            { question: 'ン', answer: '응', path: '가타카나', options: ['응', '와', '음', '은'] }
+            { question: 'リ', answer: '리', path: '가타카나/라행', options: ['リ', '루', '이', '미'] },
+            { question: 'ル', answer: '루', path: '가타카나/라행', options: ['ル', '레', '우', '유'] },
+            { question: 'レ', answer: '레', path: '가타카나/라행', options: ['レ', '로', '에', '메'] },
+            { question: 'ロ', answer: '로', path: '가타카나/라행', options: ['ロ', '라', '오', '요'] },
+            { question: 'ワ', answer: '와', path: '가타카나/와행', options: ['ワ', '오', '아', '라'] },
+            { question: 'ヲ', answer: '오(wo)', path: '가타카나/와행', options: ['ヲ', '와', '우', '응'] },
+            { question: 'ン', answer: '응', path: '가타카나', options: ['ン', '와', '음', '은'] }
         ];
 
         // 📌 [소제목 3] 교재 사진 통합 단어 데이터
@@ -291,30 +302,10 @@
             { question: 'ニュース', answer: '뉴스', row: '나행', options: ['뉴스', '드라마', '영화', '만화'] },
             { question: 'カヌー', answer: '카누', row: '나행', options: ['카누', '배', '비행기', '자동차'] },
             { question: 'ネクタイ', answer: '넥타이', row: '나행', options: ['넥타이', '모자', '장갑', '양말'] },
-            { question: 'ノート', answer: '노트', row: '나행', options: ['노트', '책', '연필', '지우개'] },
-            { question: 'ハーモニカ', answer: '하모니카', row: '하행', options: ['하모니카', '피아노', '기타', '드럼'] },
-            { question: 'ヒーター', answer: '히터', row: '하행', options: ['히터', '에어컨', '선풍기', '냉장고'] },
-            { question: 'フォーク', answer: '포크', row: '하행', options: ['포크', '나이프', '숟가락', '젓가락'] },
-            { question: 'ヘリコプター', answer: '헬리콥터', row: '하행', options: ['헬리콥터', '비행기', '자동차', '기차'] },
-            { question: 'ホチキス', answer: '호치키스', row: '하행', options: ['호치키스', '가위', '풀', '테이프'] },
-            { question: 'マッチ', answer: '성냥', row: '마행', options: ['성냥', '라이터', '양초', '불'] },
-            { question: 'ミルク', answer: '우유', row: '마행', options: ['우유', '물', '주스', '커피'] },
-            { question: 'アイスクリーム', answer: '아이스크림', row: '마행', options: ['아이스크림', '과자', '빵', '사탕'] },
-            { question: 'メロン', answer: '멜론', row: '마행', options: ['멜론', '수박', '사과', '포도'] },
-            { question: 'モノレール', answer: '모노레일', row: '마행', options: ['모노레일', '기차', '버스', '택시'] },
-            { question: 'キャッチャー', answer: '포수', row: '야행', options: ['포수', '투수', '타자', '심판'] },
-            { question: 'ユニホーム', answer: '유니폼', row: '야행', options: ['유니폼', '모자', '신발', '가방'] },
-            { question: 'ヨーグルト', answer: '요구르트', row: '야행', options: ['요구르트', '우유', '치즈', '버터'] },
-            { question: 'ラケット', answer: '라켓', row: '라행', options: ['라켓', '공', '글러브', '배트'] },
-            { question: 'リボン', answer: '리본', row: '라행', options: ['리본', '모자', '머리띠', '목걸이'] },
-            { question: 'キャラメル', answer: '캐러멜', row: '라행', options: ['캐러멜', '초콜릿', '사탕', '과자'] },
-            { question: 'レモン', answer: '레몬', row: '라행', options: ['레몬', '사과', '오렌지', '귤'] },
-            { question: 'ロープウェー', answer: '로프웨이', row: '라행', options: ['로프웨이', '기차', '버스', '비행기'] },
-            { question: 'ワイシャツ', answer: '와이셔츠', row: '와행', options: ['와이셔츠', '바지', '치마', '모자'] },
-            { question: 'パンダ', answer: '판다', row: '와행', options: ['판다', '곰', '코알라', '토끼'] }
+            { question: 'ノート', answer: '노트', row: '나행', options: ['노트', '책', '연필', '지우개'] }
         ];
 
-        // 📌 [소제목 4] 💡 신규 추가! 생활 회화 및 문장 데이터
+        // 📌 [소제목 4] 생활 회화 및 문장 데이터
         const sentenceData = [
             { question: 'おはようございます', answer: '안녕하세요(아침)', row: '회화', options: ['안녕하세요(아침)', '감사합니다', '죄송합니다', '안녕히 계세요'] },
             { question: 'こんにちは', answer: '안녕하세요(낮)', row: '회화', options: ['안녕하세요(낮)', '처음 뵙겠습니다', '잘 먹겠습니다', '네, 알겠습니다'] },
@@ -329,20 +320,34 @@
         ];
 
 <!-- ================================================== -->
-<!-- 🧠 [3단원] 게임 진행 로직 (스마트 글자 크기 조절 완비) 🧠 -->
+<!-- 🧠 [3단원] 퀴즈 방향 전환 & 원어민 발음(TTS) 마법 로직 🧠 -->
 <!-- ================================================== -->
-        // 📌 [소제목 5] 게임 상태 및 범위 선택 변수
+        // 📌 [소제목 5] 게임 상태 및 방향 설정 변수
         let currentMode = ''; 
         let currentModeData = []; 
         let quizData = []; 
         let currentQuizIndex = 0;
         let score = 0;
         let isFirstTry = true; 
-        
-        // 이즈의 진도와 💡새로 추가된 회화 모드를 켜둘게!
         let selectedRanges = ['아행', '카행', '사행', '타행', '나행', '회화'];
+        
+        // 💡 퀴즈 방향 변수 추가 (기본값: 일본어 -> 한국어)
+        let quizDirection = 'jp_to_kr'; 
 
-        // 📌 [소제목 6] 태그 클릭 시 범위 껐다 켜기 로직
+        // 📌 [소제목 6] 퀴즈 방향 변경 로직
+        function setDirection(dir) {
+            quizDirection = dir;
+            document.getElementById('dirJpToKr').classList.remove('active');
+            document.getElementById('dirKrToJp').classList.remove('active');
+            
+            if(dir === 'jp_to_kr') {
+                document.getElementById('dirJpToKr').classList.add('active');
+            } else {
+                document.getElementById('dirKrToJp').classList.add('active');
+            }
+        }
+
+        // 📌 [소제목 7] 태그 클릭 시 범위 껐다 켜기 로직
         function toggleRange(rangeName, element) {
             if (selectedRanges.includes(rangeName)) {
                 if (selectedRanges.length === 1) {
@@ -357,7 +362,7 @@
             }
         }
 
-        // 📌 [소제목 7] 화면 전환 및 데이터 필터링 (문장 모드 추가!)
+        // 📌 [소제목 8] 화면 전환 및 데이터 필터링
         function startGame(mode) {
             currentMode = mode;
             document.getElementById('mainScreen').classList.remove('active-screen');
@@ -373,7 +378,7 @@
             } else if (mode === 'word') {
                 document.getElementById('quizTitle').innerText = '단어 퀴즈';
                 baseData = wordData;
-            } else if (mode === 'sentence') { // 💡 회화 퀴즈 모드 로직 추가!
+            } else if (mode === 'sentence') { 
                 document.getElementById('quizTitle').innerText = '생활 회화 퀴즈';
                 baseData = sentenceData;
             }
@@ -413,44 +418,65 @@
             loadQuiz();
         }
 
-        // 📌 [소제목 8] 화면에 문제 세팅하기 (💡 문장 길이에 맞춰 폰트 크기 완벽 자동 조절)
+        // 📌 [소제목 9] 화면 세팅 (방향 전환 & 스마트 글자 크기 조절)
         function loadQuiz() {
             const currentQuiz = quizData[currentQuizIndex];
             isFirstTry = true; 
             
-            // 단어나 문장 모드일 때는 뜻 힌트를 띄우고 획순 보기를 숨김!
-            if (currentMode === 'word' || currentMode === 'sentence') {
-                document.getElementById('meaningHint').innerText = currentMode === 'sentence' ? "이 문장의 뜻은?" : "이 단어의 뜻은?";
-                document.getElementById('hintBtn').style.display = 'none';
+            let displayQuestion = "";
+            let displayOptions = [];
+
+            // 💡 퀴즈 방향에 따라 문제와 보기를 다르게 세팅!
+            if (quizDirection === 'jp_to_kr') {
+                // 일본어 보고 한국어 맞추기
+                displayQuestion = currentQuiz.question;
+                displayOptions = [...currentQuiz.options];
+                
+                if (currentMode === 'word' || currentMode === 'sentence') {
+                    document.getElementById('meaningHint').innerText = currentMode === 'sentence' ? "이 문장의 뜻은?" : "이 단어의 뜻은?";
+                    document.getElementById('hintBtn').style.display = 'none';
+                } else {
+                    document.getElementById('meaningHint').innerText = "";
+                    document.getElementById('hintBtn').style.display = 'inline-block';
+                }
             } else {
-                document.getElementById('meaningHint').innerText = "";
-                document.getElementById('hintBtn').style.display = 'inline-block';
+                // 한국어 보고 일본어 맞추기
+                displayQuestion = currentQuiz.answer;
+                displayOptions.push(currentQuiz.question); // 정답 하나 넣고
+                
+                // 오답 3개는 현재 범위의 다른 데이터에서 무작위로 추출
+                let wrongChoices = currentModeData.filter(item => item.question !== currentQuiz.question);
+                shuffleArray(wrongChoices);
+                for(let i = 0; i < 3 && i < wrongChoices.length; i++) {
+                    displayOptions.push(wrongChoices[i].question);
+                }
+                
+                if (currentMode === 'word' || currentMode === 'sentence') {
+                    document.getElementById('meaningHint').innerText = currentMode === 'sentence' ? "이 뜻을 가진 일본어 문장은?" : "이 뜻을 가진 일본어 단어는?";
+                    document.getElementById('hintBtn').style.display = 'none';
+                } else {
+                    document.getElementById('meaningHint').innerText = "이 소리를 내는 일본어 글자는?";
+                    document.getElementById('hintBtn').style.display = 'inline-block';
+                }
             }
 
             const questionEl = document.getElementById('questionText');
-            questionEl.innerText = currentQuiz.question;
+            questionEl.innerText = displayQuestion;
             
-            // 💡 마법의 폰트 크기 조절 로직 (회화 문장까지 커버)
-            const textLen = currentQuiz.question.length;
-            if (textLen === 1) {
-                questionEl.style.fontSize = '6rem';       // 낱글자 (예: あ)
-            } else if (textLen <= 3) {
-                questionEl.style.fontSize = '4.5rem';     // 짧은 단어 (예: りんご)
-            } else if (textLen <= 5) {
-                questionEl.style.fontSize = '3rem';       // 중간 단어 (예: ソーセージ)
-            } else if (textLen <= 7) {
-                questionEl.style.fontSize = '2.2rem';     // 긴 단어/짧은 문장
-            } else {
-                questionEl.style.fontSize = '1.8rem';     // 8글자 이상 아주 긴 문장 (예: おはようございます)
-            }
+            // 💡 글자 크기 자동 조절 (한글/일본어 상관없이 길이에 맞춰서!)
+            const textLen = displayQuestion.length;
+            if (textLen === 1) questionEl.style.fontSize = '6rem';
+            else if (textLen <= 3) questionEl.style.fontSize = '4.5rem';
+            else if (textLen <= 5) questionEl.style.fontSize = '3rem';
+            else if (textLen <= 7) questionEl.style.fontSize = '2.2rem';
+            else questionEl.style.fontSize = '1.8rem';
             
-            let shuffledOptions = [...currentQuiz.options];
-            shuffleArray(shuffledOptions);
+            shuffleArray(displayOptions);
 
             for (let i = 0; i < 4; i++) {
                 const btn = document.getElementById('btn' + i);
-                btn.innerText = shuffledOptions[i]; 
-                btn.dataset.originalText = shuffledOptions[i]; 
+                btn.innerText = displayOptions[i]; 
+                btn.dataset.originalText = displayOptions[i]; 
                 btn.classList.remove('correct', 'wrong');
                 btn.disabled = false;
                 btn.style.opacity = '1';
@@ -459,13 +485,16 @@
             document.getElementById('score').innerText = `${score} / ${quizData.length}`;
         }
 
-        // 📌 [소제목 9] 정답 채점 로직
+        // 📌 [소제목 10] 정답 채점 로직
         function checkAnswer(selectedIndex) {
             const currentQuiz = quizData[currentQuizIndex];
             const selectedBtn = document.getElementById('btn' + selectedIndex);
             const selectedText = selectedBtn.dataset.originalText; 
 
-            if (selectedText === currentQuiz.answer) {
+            // 💡 방향에 따라 정답 비교 대상이 달라짐!
+            const correctAnswer = (quizDirection === 'jp_to_kr') ? currentQuiz.answer : currentQuiz.question;
+
+            if (selectedText === correctAnswer) {
                 selectedBtn.classList.add('correct');
                 if (isFirstTry) score++; 
 
@@ -493,7 +522,20 @@
             }
         }
 
-        // 📌 [소제목 10] 획순 보기 팝업 제어 (낱글자 모드 전용)
+        // 📌 [소제목 11] 🔊 원어민 발음 읽어주기 (TTS 마법!)
+        function playTTS() {
+            // 화면에 한국어가 떠있든 일본어가 떠있든, 읽어주는 건 무조건 '일본어 정답'이어야 해!
+            const textToRead = quizData[currentQuizIndex].question; 
+            
+            // 스마트폰에 내장된 음성 합성 엔진(TTS)을 부르는 코드
+            const utterance = new SpeechSynthesisUtterance(textToRead);
+            utterance.lang = 'ja-JP'; // 일본어로 읽어줘!
+            utterance.rate = 0.85;    // 초보자가 듣기 좋게 살짝 천천히! (1.0이 기본)
+            
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // 📌 [소제목 12] 획순 보기 팝업 제어
         function showStrokeOrder() {
             const currentQuiz = quizData[currentQuizIndex];
             document.getElementById('modalTitle').innerText = `${currentQuiz.question} 쓰는 순서`;
